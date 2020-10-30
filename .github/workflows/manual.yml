@@ -32,7 +32,7 @@ jobs:
         echo "Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
         mkdir output
         mkdir build
-        $INSDIR = (Get-Location) + "/output"
+        $INSDIR = (Get-Location).ToString() + "/output"
         pushd build
         $Env:CC='clang'
         $Env:CXX='clang++'
