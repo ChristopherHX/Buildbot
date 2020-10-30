@@ -33,6 +33,8 @@ jobs:
         pushd mcpelauncher
         mkdir build
         pushd build
-        CC=clang-10 CXX=clang-10 cmake .. -DCMAKE_BUILD_TYPE=Release
+        $Env:CC='clang-10'
+        $Env:CXX='clang-10'
+        cmake .. -DCMAKE_BUILD_TYPE=Release
         popd
         popd
