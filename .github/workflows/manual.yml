@@ -34,7 +34,7 @@ jobs:
         mkdir build
         pushd build
         $Env:CC='clang-10'
-        $Env:CXX='clang-10'
+        $Env:CXX='clang++-10'
         cmake .. -DCMAKE_BUILD_TYPE=Release
         popd
         popd
