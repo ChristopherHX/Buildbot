@@ -36,7 +36,7 @@ jobs:
         pushd build
         $Env:CC='clang'
         $Env:CXX='clang++'
-        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF -DCMAKE_INSTALL_PREFIX=../output
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF -DCMAKE_INSTALL_PREFIX=($INSDIR)
         make install
         popd
         popd
