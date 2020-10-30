@@ -17,7 +17,7 @@ on:
         default: 'main'
       release:
         description: 'Is this a full release'
-        default: false
+        default: '0'
       
 jobs:
   build:
@@ -26,10 +26,13 @@ jobs:
     - name: Building
       shell: pwsh
       run: |
+        sudo apt-get install libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libasound2 libpulse-dev
         echo "Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
-        git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }}
+        git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
         echo "Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
+        pushd mcpelauncher
         mkdir build
         pushd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        CC=clang-10 CXX=clang-10 cmake .. -DCMAKE_BUILD_TYPE=Release
+        popd
         popd
