@@ -1,0 +1,35 @@
+name: Manual Build
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      mcpelauncher-manifest-repo:
+        description: 'mcpelauncher repo'
+        default: 'https://github.com/minecraft-linux/mcpelauncher-manifest.git'
+      mcpelauncher-manifest-ref:
+        description: 'mcpelauncher ref'
+        default: 'main'
+      mcpelauncher-ui-manifest-repo:
+        description: 'mcpelauncher ui repo'
+        default: 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git'
+      mcpelauncher-ui-manifest-ref:
+        description: 'mcpelauncher ref'
+        default: 'main'
+      release:
+        description: 'Is this a full release'
+        default: false
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Building
+      shell: pwsh
+      run: |
+        echo "Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
+        git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }}
+        echo "Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
+        mkdir build
+        pushd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        popd
