@@ -44,3 +44,14 @@ jobs:
       with:
         name: my-artifact
         path: output/
+  testappimage:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: pwsh
+        run: |
+          curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage --output linuxdeploy.AppImage
+          chmod +x linuxdeploy.AppImage
+          curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage --output linuxdeploy-plugin-qt.AppImage
+          chmod +x linuxdeploy-plugin-qt.AppImage
+          $Env:ARCH = 'x86_64'
+          ./linuxdeploy-plugin-qt.AppImage --appdir test
