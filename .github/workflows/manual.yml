@@ -146,6 +146,70 @@ jobs:
       with:
         name: libcpp-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
+  angle:
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'x86_64'
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'x86'
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      cache-name: cache-angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    steps:
+    - name: Cache angle
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: output
+        key: ${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
+      run: ${{ matrix.deps }}
+    - name: Build angle
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
+        $INSDIR = (Get-Location).ToString() + "/output"
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        $Env:PATH = $Env:PATH + ':' + $PWD.ToString() + '/depot_tools'
+        git clone https://github.com/minecraft-linux/angle.git
+        pushd angle
+        python scripts/bootstrap.py
+        gclient sync
+        $configFiles = Get-ChildItem ./build *.gn -rec
+        foreach ($file in $configFiles) {
+            (Get-Content $file.PSPath) |
+            Foreach-Object { $_ -replace "-fatal_warnings", "" } |
+            Set-Content $file.PSPath
+        }
+        gn gen ($INSDIR) ('--args=target_cpu="${{ matrix.arch }}" is_debug=false mac_sdk_path="' + ${SDKROOT} + '" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false')
+        autoninja -C ($INSDIR) libEGL libGLESv2
+    - name: Upload Binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
+  
   build:
     runs-on: ${{ matrix.OS }}
     strategy:
