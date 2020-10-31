@@ -45,7 +45,7 @@ jobs:
             opensslflags: darwin-i386-cc
           - OS: macos-latest
             deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
-            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/macosx11.0
+            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0
             version: '11.0'
             arch: 'arm64'
             opensslflags: darwin64-arm64-cc
