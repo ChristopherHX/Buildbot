@@ -21,37 +21,60 @@ on:
       
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      matrix:
+        include:
+          - AppImage: true
+            OS: ubuntu-latest
+          - AppImage: false
+            OS: ubuntu-latest
     steps:
-    - name: Building
+    - name: Installing Ubuntu dependencies
       shell: pwsh
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
+    - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
+      shell: pwsh
+      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
+    - name: Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
+      shell: pwsh
+      env:
+        CC: clang
+        CXX: clang++
       run: |
-        sudo apt-get install libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libasound2 libpulse-dev
-        echo "Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
-        git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
-        echo "Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}"
         mkdir output
         mkdir build
         $INSDIR = (Get-Location).ToString() + "/output"
         pushd build
-        $Env:CC = 'clang'
-        $Env:CXX = 'clang++'
         cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR)
         make install -j12
         popd
         popd
-    - uses: actions/upload-artifact@v2
+    - name: Upload Binary
+      uses: actions/upload-artifact@v2
       with:
-        name: my-artifact
+        name: ${{ matrix.OS }}-Binary
         path: output/
-  testappimage:
-    runs-on: ubuntu-latest
-    steps:
-      - shell: pwsh
-        run: |
-          curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage --output linuxdeploy.AppImage
-          chmod +x linuxdeploy.AppImage
-          curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage --output linuxdeploy-plugin-qt.AppImage
-          chmod +x linuxdeploy-plugin-qt.AppImage
-          $Env:ARCH = 'x86_64'
-          ./linuxdeploy-plugin-qt.AppImage --appdir test
+    - name: Building AppImage Binary
+      shell: pwsh
+      if: ${{ matrix.AppImage }}
+      env:
+        ARCH: x86_64
+        BUILD_NUM: ${GITHUB_RUN_NUMBER}
+        OUTPUT: Minecraft_Bedrock_Launcher-${ARCH}-build-${BUILD_NUM}.AppImage
+      run: |
+        curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage --output linuxdeploy.AppImage
+        chmod +x linuxdeploy.AppImage
+        curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage --output linuxdeploy-plugin-qt.AppImage
+        chmod +x linuxdeploy-plugin-qt.AppImage
+        $INSDIR = (Get-Location).ToString() + "/output"
+        # ./linuxdeploy-plugin-qt.AppImage --appdir $INSDIR
+        ./linuxdeploy.AppImage --appdir ($INSDIR) --output appimage
+    - name: Upload AppImage Binary
+      if: ${{ matrix.AppImage }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: AppImage
+        path: Minecraft_Bedrock_Launcher-*.AppImage
