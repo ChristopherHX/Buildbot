@@ -20,6 +20,69 @@ on:
         default: '0'
       
 jobs:
+  openssl:
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      matrix:
+        include:
+          - OS: ubuntu-latest
+            arch: 'x86_64'
+            opensslflags: linux-x86_64
+          - OS: ubuntu-latest
+            deps: sudo apt install -y gcc-multilib
+            arch: 'i386'
+            opensslflags: linux-i386
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'x86_64'
+            opensslflags: darwin64-x86_64-clang
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'i386'
+            opensslflags: darwin-i386-clang
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      SDKROOT: ${{ matrix.sdkroot }}
+    steps:
+    - name: Check
+      id: cache
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+      with:
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache openssl
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-openssl32-macos-10-10
+      with:
+        path: output
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.cache.outputs.cache-hit != 'true' && startWith(matrix.OS, 'macOS')
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.deps }} != ''
+      run: ${{ matrix.deps }}
+    - name: Build OpenSSL
+      shell: pwsh
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        pushd openssl
+        $INSDIR = (Get-Location).ToString() + "/output"
+        perl ./Configure ${{ matrix.opensslflags }} ('--prefix=' + $INSDIR)
+        make install_sw
+    - name: Upload Binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
   build:
     runs-on: ${{ matrix.OS }}
     strategy:
