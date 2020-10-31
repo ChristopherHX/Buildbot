@@ -23,6 +23,7 @@ jobs:
   openssl:
     runs-on: ${{ matrix.OS }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - OS: ubuntu-latest
@@ -31,7 +32,7 @@ jobs:
           - OS: ubuntu-latest
             deps: sudo apt install -y gcc-multilib
             arch: 'i386'
-            opensslflags: linux-i386
+            opensslflags: linux-x86
           - OS: macos-latest
             version: '10.10'
             sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
@@ -41,7 +42,7 @@ jobs:
             version: '10.10'
             sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
-            opensslflags: darwin-i386-clang
+            opensslflags: darwin-i386-cc
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       SDKROOT: ${{ matrix.sdkroot }}
