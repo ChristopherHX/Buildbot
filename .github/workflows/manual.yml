@@ -43,9 +43,12 @@ jobs:
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
             opensslflags: darwin-i386-cc
+          - OS: macos-latest
+            version: '11.0'
+            arch: 'arm64'
+            opensslflags: darwin64-arm64-cc
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      SDKROOT: ${{ github.workspace }}/${{ matrix.sdkroot }}
       cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     steps:
     - name: Cache openssl
@@ -65,9 +68,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
+        if (${{ matrix.sdkroot }} -ne '') {
+          $Env:SDKROOT = ${{ github.workspace }}/${{ matrix.sdkroot }}
+        }
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         $INSDIR = (Get-Location).ToString() + "/output"
         pushd openssl
+        # Workaround not merged arm64 mac support
+        git remote add darwin_arm https://github.com/stuartcarnie/openssl.git
+        git pull darwin_arm sgc/darwin64_arm
         perl ./Configure ${{ matrix.opensslflags }} ('--prefix=' + $INSDIR)
         make install_sw
     - name: Upload Binary
