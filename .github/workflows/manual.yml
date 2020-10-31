@@ -91,6 +91,61 @@ jobs:
       with:
         name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
+  libcpp:
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'x86_64'
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'i386'
+            llvmflags: -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      cache-name: cache-libcpp-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    steps:
+    - name: Cache libc++
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: output
+        key: ${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
+      run: ${{ matrix.deps }}
+    - name: Build libc++
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
+        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
+        $INSDIR = (Get-Location).ToString() + "/output"
+        mkdir build
+        pushd build
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TOOLS=False -DLLVM_INCLUDE_TOOLS=False -DLLVM_INCLUDE_EXAMPLES=False -DLLVM_INCLUDE_TESTS=False -DLLVM_INCLUDE_DOCS=False -DLLVM_ENABLE_OCAMLDOC=False ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.llvmflags}}
+        make install -j4
+    - name: Upload Binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: libcpp-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
   build:
     runs-on: ${{ matrix.OS }}
     strategy:
