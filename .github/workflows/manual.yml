@@ -46,22 +46,19 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       SDKROOT: ${{ matrix.sdkroot }}
+      cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     steps:
     - name: Check
       id: cache
       uses: Mystraht/cache@master
-      env:
-        cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
       with:
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
+        key: ${{ env.cache-name }}
     - name: Cache openssl
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache@v1
-      env:
-        cache-name: cache-openssl32-macos-10-10
       with:
         path: output
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
+        key: ${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS')
       with:
