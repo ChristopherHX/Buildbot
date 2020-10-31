@@ -47,30 +47,22 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       SDKROOT: ${{ github.workspace }}/${{ matrix.sdkroot }}
       cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-      GITHUB_REF: refs/heads/main
     steps:
-    - name: Check
-      id: cache
-      uses: Mystraht/cache@master
-      with:
-        key: ${{ env.cache-name }}
     - name: Cache openssl
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: output
         key: ${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS')
+      if: startsWith(matrix.OS, 'macOS')
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
     - name: Install Deps
-      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.deps }} != ''
+      if: ${{ matrix.deps }} != ''
       run: ${{ matrix.deps }}
     - name: Build OpenSSL
       shell: pwsh
-      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         $INSDIR = (Get-Location).ToString() + "/output"
