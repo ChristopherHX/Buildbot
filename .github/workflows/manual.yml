@@ -52,6 +52,7 @@ jobs:
       cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     steps:
     - name: Cache openssl
+      id: cache
       uses: actions/cache@v2
       with:
         path: output
