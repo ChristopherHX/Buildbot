@@ -62,7 +62,7 @@ jobs:
         path: output
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache.outputs.cache-hit != 'true' && startWith(matrix.OS, 'macOS')
+      if: steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS')
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
