@@ -63,7 +63,7 @@ jobs:
       env:
         ARCH: x86_64
         BUILD_NUM: ${GITHUB_RUN_NUMBER}
-        OUTPUT: Minecraft_Bedrock_Launcher-${ARCH}-build-${BUILD_NUM}.AppImage
+        OUTPUT: Minecraft_Bedrock_Launcher-x86_64-build-0.AppImage
       run: |
         curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage --output linuxdeploy.AppImage
         chmod +x linuxdeploy.AppImage
