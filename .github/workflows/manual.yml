@@ -54,14 +54,15 @@ jobs:
         path: output
         key: ${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: startsWith(matrix.OS, 'macOS')
+      if: steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS')
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
     - name: Install Deps
-      if: ${{ matrix.deps }} != ''
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.deps }} != ''
       run: ${{ matrix.deps }}
     - name: Build OpenSSL
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
