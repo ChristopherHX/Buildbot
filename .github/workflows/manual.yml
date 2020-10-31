@@ -58,7 +58,7 @@ jobs:
         path: output
         key: ${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && '${{ matrix.sdkroot }}' != '' }}
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
