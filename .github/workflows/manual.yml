@@ -140,7 +140,7 @@ jobs:
         mkdir build
         pushd build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TOOLS=False -DLLVM_INCLUDE_TOOLS=False -DLLVM_INCLUDE_EXAMPLES=False -DLLVM_INCLUDE_TESTS=False -DLLVM_INCLUDE_DOCS=False -DLLVM_ENABLE_OCAMLDOC=False ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.llvmflags}}
-        make install -j4
+        make install-cxx install-cxxabi -j4
     - name: Upload Binary
       uses: actions/upload-artifact@v2
       with:
