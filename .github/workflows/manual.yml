@@ -35,18 +35,19 @@ jobs:
             opensslflags: linux-x86
           - OS: macos-latest
             version: '10.10'
-            sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'x86_64'
             opensslflags: darwin64-x86_64-clang
           - OS: macos-latest
             version: '10.10'
-            sdkroot: ${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
             opensslflags: darwin-i386-cc
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      SDKROOT: ${{ matrix.sdkroot }}
+      SDKROOT: ${{ github.workspace }}/${{ matrix.sdkroot }}
       cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+      GITHUB_REF: refs/heads/main
     steps:
     - name: Check
       id: cache
