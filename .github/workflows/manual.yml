@@ -68,7 +68,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        if (${{ matrix.sdkroot }} -ne '') {
+        if ('${{ matrix.sdkroot }}' -ne '') {
           $Env:SDKROOT = ${{ github.workspace }}/${{ matrix.sdkroot }}
         }
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
