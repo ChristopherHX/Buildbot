@@ -45,6 +45,7 @@ jobs:
             opensslflags: darwin-i386-cc
           - OS: macos-latest
             deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
+            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/macosx11.0
             version: '11.0'
             arch: 'arm64'
             opensslflags: darwin64-arm64-cc
@@ -59,7 +60,7 @@ jobs:
         path: output
         key: ${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
@@ -71,7 +72,11 @@ jobs:
       shell: pwsh
       run: |
         if ('${{ matrix.sdkroot }}' -ne '') {
-          $Env:SDKROOT = ${{ github.workspace }}/${{ matrix.sdkroot }}
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = ${{ matrix.sdkroot }}
+          } else {
+            $Env:SDKROOT = ${{ github.workspace }}/${{ matrix.sdkroot }}
+          }
         }
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         $INSDIR = (Get-Location).ToString() + "/output"
