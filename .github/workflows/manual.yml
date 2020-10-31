@@ -37,7 +37,7 @@ jobs:
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'x86_64'
-            opensslflags: darwin64-x86_64-clang
+            opensslflags: darwin64-x86_64-cc
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
