@@ -160,6 +160,11 @@ jobs:
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
             arch: 'x86'
+          - OS: macos-latest
+            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
+            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
+            version: '11.0'
+            arch: 'arm64'
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
