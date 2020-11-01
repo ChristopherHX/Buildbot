@@ -211,7 +211,12 @@ jobs:
             Foreach-Object { $_ -replace "-fatal_warnings", "" -replace "-Wdeprecated-declarations","" } |
             Set-Content $file.PSPath
         }
-        gn gen ($INSDIR) ('--args=target_cpu=\"${{ matrix.arch }}\" is_debug=false mac_sdk_path=\"' + $Env:SDKROOT + '\" mac_sdk_min=\"${{ matrix.version }}\" mac_min_system_version=\"${{ matrix.version }}\" mac_deployment_target=\"${{ matrix.version }}\" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false cflags=\"-DGL_SILENCE_DEPRECATION\"')
+        $Env:CFLAGS = '-DGL_SILENCE_DEPRECATION'
+        $Env:CXXFLAGS = '-DGL_SILENCE_DEPRECATION'
+        $Env:OBJCFLAGS = '-DGL_SILENCE_DEPRECATION'
+        $Env:OBJCXXFLAGS = '-DGL_SILENCE_DEPRECATION'
+         
+        gn gen ($INSDIR) ('--args=target_cpu=\"${{ matrix.arch }}\" is_debug=false mac_sdk_path=\"' + $Env:SDKROOT + '\" mac_sdk_min=\"${{ matrix.version }}\" mac_min_system_version=\"${{ matrix.version }}\" mac_deployment_target=\"${{ matrix.version }}\" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false')
         autoninja -C ($INSDIR) libEGL libGLESv2
     - name: Upload Binary
       uses: actions/upload-artifact@v2
@@ -263,6 +268,9 @@ jobs:
             $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
           }
         }
+        if ('${{ matrix.arch }}' -eq 'i386') {
+          $Env:CFLAGS='-m32'
+        }
         git clone https://github.com/json-c/json-c.git
         curl -L https://github.com/erikd/libsndfile/releases/download/v1.0.30/libsndfile-1.0.30.tar.bz2 --output libsndfile.tar.bz2
         mkdir libsndfile
@@ -308,12 +316,14 @@ jobs:
         make install -j4
         popd
         pushd libogg
-        ./autogen.sh || mv ./*/* . && ./autogen.sh
+        mv ./*/* .
+        ./autogen.sh
         ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
         make install -j4
         popd
         pushd libsndfile
-        autoreconf -fvi || mv ./*/* . && autoreconf -fvi
+        mv ./*/* .
+        autoreconf -fvi
         ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
         make install -j4
         popd
