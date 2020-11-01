@@ -303,16 +303,17 @@ jobs:
         make install -j4
         popd
         pushd opus
+        ./autogen.sh
         ./configure --disable-dependency-tracking --disable-doc ('--prefix=' + $INSDIR)
         make install -j4
         popd
         pushd libogg
-        ./autogen.sh
+        ./autogen.sh || mv ./*/* . && ./autogen.sh
         ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
         make install -j4
         popd
         pushd libsndfile
-        autoreconf -fvi
+        autoreconf -fvi || mv ./*/* . && autoreconf -fvi
         ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
         make install -j4
         popd
