@@ -154,11 +154,11 @@ jobs:
         include:
           - OS: macos-latest
             version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'x86_64'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
+            arch: 'x64'
           - OS: macos-latest
             version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
             arch: 'x86'
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
