@@ -208,7 +208,7 @@ jobs:
         $configFiles = Get-ChildItem ./build *.gn -rec
         foreach ($file in $configFiles) {
             (Get-Content $file.PSPath) |
-            Foreach-Object { $_ -replace "-fatal_warnings", "" -replace "-Wdeprecated-declarations","" } |
+            Foreach-Object { $_ -replace "-fatal_warnings", "" -replace "-Wdeprecated-declarations","" -replace "-Werror","" } |
             Set-Content $file.PSPath
         }
         $Env:CFLAGS = '-DGL_SILENCE_DEPRECATION'
