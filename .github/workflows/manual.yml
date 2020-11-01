@@ -239,6 +239,7 @@ jobs:
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
             deps: brew install automake autoconf autogen intltool libtool
+            extaautoconf: --host=i386-apple-darwin
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-pulseaudio-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
@@ -298,38 +299,38 @@ jobs:
         popd
         pushd flac
         ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR) --enable-static
+        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR) --enable-static ${{ matrix.extaautoconf }}
         make install -j4
         popd
         pushd vorbis
         ./autogen.sh
-        ./configure --disable-dependency-tracking ('--prefix=' + $INSDIR)
+        ./configure --disable-dependency-tracking ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
         pushd opus
         ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-doc ('--prefix=' + $INSDIR)
+        ./configure --disable-dependency-tracking --disable-doc ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
         pushd ogg
         ./autogen.sh
-        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
+        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
         pushd libsndfile
         ./autogen.sh
-        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR)
+        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
         git clone https://github.com/xiph/speexdsp.git
         pushd speexdsp
         ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR)
+        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
         git clone https://anongit.freedesktop.org/git/pulseaudio/pulseaudio.git
         pushd pulseaudio
-        ./autogen.sh --disable-dependency-tracking --disable-silent-rules --enable-coreaudio-output --disable-neon-opt --disable-nls --disable-x11 ('--with-mac-sysroot=' + $Env:SDKROOT) --with-mac-version-min=${{ matrix.version }} ('--prefix=' + $INSDIR)
+        ./autogen.sh --disable-dependency-tracking --disable-silent-rules --enable-coreaudio-output --disable-neon-opt --disable-nls --disable-x11 ('--with-mac-sysroot=' + $Env:SDKROOT) --with-mac-version-min=${{ matrix.version }} ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
         make install -j4
         popd
     - name: Upload Binary
