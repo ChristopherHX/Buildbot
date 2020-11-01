@@ -161,9 +161,12 @@ jobs:
             sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
             arch: 'x86'
           - OS: macos-latest
-            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
-            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
-            version: '11.0'
+            deps: |
+              sudo xcode-select --switch /Applications/Xcode_12.2.app
+              # tell angle it is 10.16 instead of 11.0
+              sudo ln -s /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.16.sdk
+            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.16.sdk
+            version: '10.16'
             arch: 'arm64'
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
