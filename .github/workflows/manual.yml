@@ -233,12 +233,12 @@ jobs:
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'x86_64'
-            deps: brew install automake autoconf autogen intltool
+            deps: brew install automake autoconf autogen intltool libtool
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
-            deps: brew install automake autoconf autogen intltool
+            deps: brew install automake autoconf autogen intltool libtool
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-pulseaudio-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
