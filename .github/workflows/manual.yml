@@ -228,15 +228,17 @@ jobs:
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'x86_64'
+            deps: brew install automake autoconf
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
+            deps: brew install automake autoconf
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-pulseaudio-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     steps:
-    - name: Cache libc++
+    - name: Cache pulse
       id: cache
       uses: actions/cache@v2
       with:
@@ -250,7 +252,7 @@ jobs:
     - name: Install Deps
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
       run: ${{ matrix.deps }}
-    - name: Build libc++
+    - name: Build pulse
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
@@ -271,7 +273,6 @@ jobs:
         curl -L https://downloads.sourceforge.net/project/soxr/soxr-0.1.3-Source.tar.xz --output soxr.tar.gz
         mkdir soxr
         tar -xf soxr.tar.gz -C soxr
-        curl -L 
         git clone https://gitlab.xiph.org/xiph/flac.git
         git clone https://gitlab.xiph.org/xiph/vorbis.git
         git clone https://gitlab.xiph.org/xiph/opus.git
@@ -283,6 +284,7 @@ jobs:
         rm -r ./*
         popd
         pushd soxr
+        mv ./*/* .
         curl -L https://raw.githubusercontent.com/Homebrew/formula-patches/76868b36263be42440501d3692fd3a258f507d82/libsoxr/arm64_defines.patch | patch
         popd
         pushd build
