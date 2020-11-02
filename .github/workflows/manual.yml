@@ -230,7 +230,7 @@ jobs:
       matrix:
         include:
         - OS: macos-latest
-          deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
+          deps: sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
           sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.16.sdk
           version: '11.0'
           arch: 'arm64'
