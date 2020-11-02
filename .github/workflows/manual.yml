@@ -254,7 +254,6 @@ jobs:
       run: ${{ matrix.deps }}
     - name: Apply custom patch and Update brew
       if: steps.cache.outputs.cache-hit != 'true'
-      working-directory: "/usr/local/Homebrew"
       run: |
         git clone https://github.com/homebrew/brew.git
         pushd brew
