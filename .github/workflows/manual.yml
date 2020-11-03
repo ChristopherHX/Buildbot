@@ -223,28 +223,40 @@ jobs:
       with:
         name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
-  pulseaudio:
+  freetype2:
     runs-on: ${{ matrix.OS }}
     strategy:
       fail-fast: false
       matrix:
         include:
+          - OS: ubuntu-latest
+            arch: 'x86_64'
+          - OS: ubuntu-latest
+            deps: sudo apt install -y g++-multilib
+            arch: 'i386'
+            cmakeflags: -DCMAKE_ASM_FLAGS="-m32" -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'x86_64'
-            deps: brew install automake autoconf autogen intltool libtool
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             arch: 'i386'
-            deps: brew install automake autoconf autogen intltool libtool
-            extaautoconf: --host=i386-apple-darwin
+            cmakeflags: -DCMAKE_ASM_FLAGS="--target=i386-apple-darwin" -DCMAKE_C_FLAGS="--target=i386-apple-darwin" -DCMAKE_CXX_FLAGS="--target=i386-apple-darwin"
+          - OS: macos-latest
+            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
+            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
+            version: '11.0'
+            arch: 'arm64'
+            cmakeflags: -DCMAKE_ASM_FLAGS="--target=arm64-apple-darwin" -DCMAKE_C_FLAGS="--target=arm64-apple-darwin" -DCMAKE_CXX_FLAGS="--target=arm64-apple-darwin"
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      cache-name: cache-pulseaudio-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+      cache-name: cache-freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+      CC: clang
+      CXX: clang++
     steps:
-    - name: Cache pulse
+    - name: Cache freetype2
       id: cache
       uses: actions/cache@v2
       with:
@@ -258,7 +270,7 @@ jobs:
     - name: Install Deps
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
       run: ${{ matrix.deps }}
-    - name: Build pulse
+    - name: Build freetype
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
@@ -269,74 +281,15 @@ jobs:
             $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
           }
         }
-        if ('${{ matrix.arch }}' -eq 'i386') {
-          $Env:CFLAGS='-m32'
-        }
-        git clone https://github.com/json-c/json-c.git
-        curl -L https://downloads.sourceforge.net/project/soxr/soxr-0.1.3-Source.tar.xz --output soxr.tar.gz
-        mkdir soxr
-        tar -xf soxr.tar.gz -C soxr
-        git clone https://gitlab.xiph.org/xiph/flac.git
-        git clone https://gitlab.xiph.org/xiph/vorbis.git
-        git clone https://gitlab.xiph.org/xiph/opus.git
-        git clone https://gitlab.xiph.org/xiph/ogg.git
-        git clone https://github.com/erikd/libsndfile.git
         $INSDIR = (Get-Location).ToString() + "/output"
-        mkdir build
-        pushd build
-        cmake ../json-c ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR)
-        make install -j4
-        rm -r ./*
-        popd
-        pushd soxr
-        mv ./*/* .
-        curl -L https://raw.githubusercontent.com/Homebrew/formula-patches/76868b36263be42440501d3692fd3a258f507d82/libsoxr/arm64_defines.patch | patch
-        popd
-        pushd build
-        cmake ../soxr ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR)
-        make install -j4
-        rm -r ./*
-        popd
-        pushd flac
-        ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR) --enable-static ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        pushd vorbis
-        ./autogen.sh
-        ./configure --disable-dependency-tracking ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        pushd opus
-        ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-doc ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        pushd ogg
-        ./autogen.sh
-        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        pushd libsndfile
-        ./autogen.sh
-        ./configure --disable-dependency-tracking  ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        git clone https://github.com/xiph/speexdsp.git
-        pushd speexdsp
-        ./autogen.sh
-        ./configure --disable-dependency-tracking --disable-debug ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
-        git clone https://anongit.freedesktop.org/git/pulseaudio/pulseaudio.git
-        pushd pulseaudio
-        ./autogen.sh --disable-dependency-tracking --disable-silent-rules --enable-coreaudio-output --disable-neon-opt --disable-nls --disable-x11 ('--with-mac-sysroot=' + $Env:SDKROOT) --with-mac-version-min=${{ matrix.version }} ('--prefix=' + $INSDIR) ${{ matrix.extaautoconf }}
-        make install -j4
-        popd
+        git clone https://git.savannah.gnu.org/cgit/freetype/freetype2.git freetype2
+        mkdir output
+        pushd output
+        cmake ../freetype2 -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.cmakeflags }}
     - name: Upload Binary
       uses: actions/upload-artifact@v2
       with:
-        name: pulseaudio-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        name: freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
   build:
     runs-on: ${{ matrix.OS }}
