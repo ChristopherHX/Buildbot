@@ -229,12 +229,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - OS: ubuntu-latest
-            arch: 'x86_64'
-          - OS: ubuntu-latest
-            deps: sudo apt install -y g++-multilib
-            arch: 'i386'
-            cmakeflags: -DCMAKE_ASM_FLAGS="-m32" -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           - OS: macos-latest
             version: '10.10'
             sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
