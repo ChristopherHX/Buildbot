@@ -292,8 +292,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - AppImage: true
-            OS: ubuntu-latest
+          #- AppImage: true
+          #  OS: ubuntu-latest
           - AppImage: false
             OS: ubuntu-latest
     steps:
