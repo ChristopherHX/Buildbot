@@ -282,7 +282,7 @@ jobs:
           }
         }
         $INSDIR = (Get-Location).ToString() + "/output"
-        git clone https://git.savannah.gnu.org/cgit/freetype/freetype2.git freetype2
+        git clone git://git.savannah.gnu.org/freetype/freetype2.git freetype2
         mkdir output
         pushd output
         cmake ../freetype2 -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.cmakeflags }}
