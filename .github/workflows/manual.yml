@@ -252,7 +252,7 @@ jobs:
             cmakeflags: -DCMAKE_ASM_FLAGS="--target=arm64-apple-darwin" -DCMAKE_C_FLAGS="--target=arm64-apple-darwin" -DCMAKE_CXX_FLAGS="--target=arm64-apple-darwin"
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      cache-name: cache-freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+      cache-name: cache-freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-v2
       CC: clang
       CXX: clang++
     steps:
@@ -284,8 +284,10 @@ jobs:
         $INSDIR = (Get-Location).ToString() + "/output"
         git clone git://git.savannah.gnu.org/freetype/freetype2.git freetype2
         mkdir output
-        pushd output
+        mkdir build
+        pushd build
         cmake ../freetype2 -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.cmakeflags }}
+        make install -j4
     - name: Upload Binary
       uses: actions/upload-artifact@v2
       with:
