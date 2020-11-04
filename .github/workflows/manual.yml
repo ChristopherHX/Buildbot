@@ -281,6 +281,7 @@ jobs:
         path: output/
   build:
     runs-on: ${{ matrix.OS }}
+    needs: ${{ fromJson(matrix.needs) }}
     strategy:
       matrix:
         include:
@@ -288,12 +289,38 @@ jobs:
           #  OS: ubuntu-latest
           - AppImage: false
             OS: ubuntu-latest
+            arch: amd64
+            deps: |
+              sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
+            needs: ${{ toJson("[]") }}
+            triple: x86_64-linux-gnu
+          - AppImage: false
+            OS: ubuntu-latest
+            arch: arm64
+            triple: aarch64-linux-gnu
+            deps: |
+              sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
+            needs: ${{ toJson("[]") }}
+          - AppImage: false
+            OS: macos-latest
+            arch: amd64
+            needs: ${{ toJson("[ \"freetype2\", \"libcpp\", \"openssl\" ]") }}
+            triple: x86_64-apple-darwin
+          - AppImage: false
+            OS: macos-latest
+            arch: arm64
+            deps: |
+              sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
+            triple: arm64-apple-darwin
+            needs: ${{ toJson("[ \"freetype2\", \"openssl\" ]") }}
+    env:
+      CC: clang
+      CXX: clang++
+      DEBIAN_FRONTEND: noninteractive
     steps:
-    - name: Installing Ubuntu dependencies
+    - name: Install Deps
       shell: pwsh
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
+      run: ${{ matrix.deps }}
     - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
@@ -303,11 +330,18 @@ jobs:
         CC: clang
         CXX: clang++
       run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
         mkdir output
         mkdir build
         $INSDIR = (Get-Location).ToString() + "/output"
         pushd build
-        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR)
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }}
         make install -j12
         popd
         popd
