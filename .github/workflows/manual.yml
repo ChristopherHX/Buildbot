@@ -301,21 +301,26 @@ jobs:
             arch: arm64
             triple: aarch64-linux-gnu
             deps: |
+              sudo dpkg --add-architecture arm64
+              sudo apt-get update -y
               sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
             freetype: false
             openssl: false
           - AppImage: false
             OS: macos-latest
-            arch: amd64
+            arch: x86_64
             version: "10.10"
             triple: x86_64-apple-darwin
             freetype: true
             openssl: true
+            deps: |
+              brew install autoconf automake
           - AppImage: false
             OS: macos-latest
             arch: arm64
             version: "11.0"
             deps: |
+              brew install autoconf automake
               sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
             triple: arm64-apple-darwin
             freetype: true
