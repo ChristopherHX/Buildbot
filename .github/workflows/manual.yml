@@ -281,7 +281,7 @@ jobs:
         path: output/
   build:
     runs-on: ${{ matrix.OS }}
-    needs: ${{ fromJson('${{ matrix.needs }}') }}
+    needs: [ "freetype2", "libcpp", "openssl" ]
     strategy:
       matrix:
         include:
@@ -292,7 +292,6 @@ jobs:
             arch: amd64
             deps: |
               sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
-            needs: "[]"
             triple: x86_64-linux-gnu
           - AppImage: false
             OS: ubuntu-latest
@@ -300,11 +299,9 @@ jobs:
             triple: aarch64-linux-gnu
             deps: |
               sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
-            needs: "[]"
           - AppImage: false
             OS: macos-latest
             arch: amd64
-            needs: "[ \"freetype2\", \"libcpp\", \"openssl\" ]"
             triple: x86_64-apple-darwin
           - AppImage: false
             OS: macos-latest
@@ -312,7 +309,6 @@ jobs:
             deps: |
               sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
             triple: arm64-apple-darwin
-            needs: "[ \"freetype2\", \"openssl\" ]"
     env:
       CC: clang
       CXX: clang++
