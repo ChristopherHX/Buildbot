@@ -324,6 +324,7 @@ jobs:
               brew install autoconf automake
               sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
             triple: arm64-apple-darwin
+            cmakeextraflags: -DCMAKE_SYSTEM_PROCESSOR=aarch64
             freetype: true
             openssl: true
     env:
@@ -372,7 +373,7 @@ jobs:
           }
           $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
         }
-        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} -DJNI_USE_JNIVM=ON $EXTRA_FLAGS
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} -DJNI_USE_JNIVM=ON $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
         make install -j4
         popd
         popd
