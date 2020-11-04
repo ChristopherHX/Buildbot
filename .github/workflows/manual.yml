@@ -283,6 +283,7 @@ jobs:
     runs-on: ${{ matrix.OS }}
     needs: [ "freetype2", "libcpp", "openssl" ]
     strategy:
+      fail-fast: false
       matrix:
         include:
           #- AppImage: true
@@ -293,23 +294,34 @@ jobs:
             deps: |
               sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
             triple: x86_64-linux-gnu
+            freetype: false
+            openssl: false
           - AppImage: false
             OS: ubuntu-latest
             arch: arm64
             triple: aarch64-linux-gnu
             deps: |
               sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
+            freetype: false
+            openssl: false
           - AppImage: false
             OS: macos-latest
             arch: amd64
+            version: "10.10"
             triple: x86_64-apple-darwin
+            freetype: true
+            openssl: true
           - AppImage: false
             OS: macos-latest
             arch: arm64
+            version: "11.0"
             deps: |
               sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
             triple: arm64-apple-darwin
+            freetype: true
+            openssl: true
     env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       CC: clang
       CXX: clang++
       DEBIAN_FRONTEND: noninteractive
@@ -320,6 +332,16 @@ jobs:
     - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
+    - uses: actions/download-artifact@v2
+      id: freetype
+      if: ${{ matrix.freetype }}
+      with:
+        name: freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    - uses: actions/download-artifact@v2
+      id: openssl
+      if: ${{ matrix.openssl }}
+      with:
+        name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     - name: Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       env:
@@ -337,8 +359,15 @@ jobs:
         mkdir build
         $INSDIR = (Get-Location).ToString() + "/output"
         pushd build
-        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }}
-        make install -j12
+        $EXTRA_FLAGS = ''
+        if ('${{steps.openssl.outputs.download-path}}' -ne '') {
+          if ($EXTRA_FLAGS -ne '') {
+            $EXTRA_FLAGS += ' '
+          }
+          $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
+        }
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS
+        make install -j4
         popd
         popd
     - name: Upload Binary
