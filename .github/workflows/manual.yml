@@ -302,6 +302,7 @@ jobs:
             triple: aarch64-linux-gnu
             deps: |
               sudo dpkg --add-architecture arm64
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo apt-get update -y
               sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
             freetype: false
