@@ -291,6 +291,7 @@ jobs:
           - AppImage: false
             OS: ubuntu-latest
             arch: amd64
+            container: '{}'
             deps: |
               sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
             triple: x86_64-linux-gnu
@@ -317,12 +318,14 @@ jobs:
             triple: x86_64-apple-darwin
             freetype: true
             openssl: true
+            container: '{}'
             deps: |
               brew install autoconf automake
           - AppImage: false
             OS: macos-latest
             arch: arm64
             version: "11.0"
+            container: '{}'
             deps: |
               brew install autoconf automake
               sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
