@@ -300,6 +300,7 @@ jobs:
             OS: ubuntu-latest
             arch: arm64
             triple: aarch64-linux-gnu
+            container: '{ "image": "ubuntu:18.04" }'
             deps: |
               sudo dpkg --add-architecture arm64
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
@@ -334,6 +335,7 @@ jobs:
       CC: clang
       CXX: clang++
       DEBIAN_FRONTEND: noninteractive
+    container: ${{ fromJson(matrix.container) }}
     steps:
     - name: Install Deps
       shell: pwsh
