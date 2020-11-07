@@ -370,7 +370,7 @@ jobs:
               brew install autoconf automake
           - OS: macos-latest
             version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
             arch: 'i386'
             triple: 'i386-apple-darwin'
             freetype: true
