@@ -298,6 +298,25 @@ jobs:
             freetype: false
             openssl: false
           - AppImage: false
+            OS: ubuntu-latest
+            arch: arm64
+            triple: aarch64-linux-gnu
+            deps: |
+              sudo dpkg --add-architecture arm64
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo apt-get update -y
+              sudo apt-get upgrade -y
+              sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
+            freetype: false
+            openssl: false
+          - AppImage: false
             OS: macos-latest
             arch: x86_64
             version: "10.10"
@@ -402,6 +421,7 @@ jobs:
   buildlinuxarm:
     runs-on: ${{ matrix.OS }}
     needs: [ "openssl" ]
+    if: false
     strategy:
       fail-fast: false
       matrix:
