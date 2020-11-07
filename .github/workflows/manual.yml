@@ -413,7 +413,7 @@ jobs:
             container: '{ "image": "ubuntu:18.04" }'
             deps: |
               apt-get update
-              apt-get install lsb-release
+              apt-get install -y lsb-release
               dpkg --add-architecture arm64
               bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
               bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
