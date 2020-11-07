@@ -299,6 +299,16 @@ jobs:
             openssl: false
           - AppImage: false
             OS: ubuntu-latest
+            arch: i386
+            container: '{}'
+            deps: |
+              sudo apt-get install -y g++-multilib libssl-dev:i386 libpng-dev:i386 libx11-dev:i386 libxi-dev:i386 libcurl4-openssl-dev:i386 libudev-dev:i386 libevdev-dev:i386 libegl1-mesa-dev:i386 libpulse-dev:i386
+            triple: i386-linux-gnu
+            freetype: false
+            openssl: false
+            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/
+          - AppImage: false
+            OS: ubuntu-latest
             arch: arm64
             triple: aarch64-linux-gnu
             deps: |
@@ -321,10 +331,44 @@ jobs:
             freetype: false
             openssl: false
           - AppImage: false
+            OS: ubuntu-latest
+            arch: armhf
+            triple: arm-linux-gnueabihf
+            deps: |
+              sudo dpkg --add-architecture armhf
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
+              sudo apt-get update -y
+              # sudo apt remove '*-dev'
+              sudo apt-get install -y g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libatomic1:armhf libpng-dev:armhf libx11-dev:armhf libxi-dev:armhf libcurl4-openssl-dev:armhf libudev-dev:armhf libevdev-dev:armhf libegl1-mesa-dev:armhf libpulse-dev:armhf
+              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
+              echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
+            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            freetype: false
+            openssl: false
+          - AppImage: false
             OS: macos-latest
             arch: x86_64
             version: "10.10"
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
             triple: x86_64-apple-darwin
+            freetype: true
+            openssl: true
+            container: '{}'
+            deps: |
+              brew install autoconf automake
+          - OS: macos-latest
+            version: '10.10'
+            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            arch: 'i386'
+            triple: 'i386-apple-darwin'
             freetype: true
             openssl: true
             container: '{}'
@@ -351,6 +395,11 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     # container: ${{ fromJson(matrix.container) }}
     steps:
+    - uses: actions/checkout@v1
+      if: ${{ startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
@@ -399,7 +448,7 @@ jobs:
     - name: Upload Binary
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.OS }}-Binary
+        name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
     - name: Building AppImage Binary
       shell: pwsh
