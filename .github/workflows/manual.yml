@@ -312,8 +312,11 @@ jobs:
               sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo apt-get update -y
-              sudo apt-get upgrade -y
               sudo apt-get install -y libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
+              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
+              echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt')
+            envflags: $Env:LDFLAGS = '-fuse=lld'
             freetype: false
             openssl: false
           - AppImage: false
@@ -379,6 +382,7 @@ jobs:
         mkdir output
         mkdir build
         $INSDIR = (Get-Location).ToString() + "/output"
+        ${{ matrix.envflags }}
         pushd build
         $EXTRA_FLAGS = ''
         if ('${{steps.openssl.outputs.download-path}}' -ne '') {
