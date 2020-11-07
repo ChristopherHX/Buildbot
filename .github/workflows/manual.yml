@@ -361,7 +361,7 @@ jobs:
             OS: macos-latest
             arch: x86_64
             version: "10.10"
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
+            sdkroot: ../MacOSX-SDKs/MacOSX10.14.sdk
             triple: x86_64-apple-darwin
             freetype: true
             openssl: true
