@@ -412,23 +412,23 @@ jobs:
             triple: aarch64-linux-gnu
             container: '{ "image": "ubuntu:18.04" }'
             deps: |
-              sudo dpkg --add-architecture arm64
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update
+              dpkg --add-architecture arm64
+              bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
+              bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
+              apt-get update
               # Install pre-requisite packages.
-              sudo apt-get install -y wget apt-transport-https
+              apt-get install -y wget apt-transport-https
               # Download the Microsoft repository GPG keys
               wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
               # Register the Microsoft repository GPG keys
-              sudo dpkg -i packages-microsoft-prod.deb
+              dpkg -i packages-microsoft-prod.deb
               # Update the list of products
-              sudo apt-get update
+              apt-get update
               # Enable the "universe" repositories
-              sudo add-apt-repository universe
+              add-apt-repository universe
               # Install PowerShell
-              sudo apt-get install -y powershell
-              sudo apt-get install -y libpng-de''v:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
+              apt-get install -y powershell
+              apt-get install -y libpng-de''v:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
             freetype: false
             openssl: false
     env:
