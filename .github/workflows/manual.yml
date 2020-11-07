@@ -426,8 +426,6 @@ jobs:
               dpkg -i packages-microsoft-prod.deb
               # Update the list of products
               apt-get update
-              # Enable the "universe" repositories
-              add-apt-repository universe
               # Install PowerShell
               apt-get install -y powershell
               apt-get install -y libpng-de''v:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
