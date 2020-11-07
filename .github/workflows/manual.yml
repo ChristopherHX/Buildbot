@@ -318,7 +318,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Darwin)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             triple: arm64-apple-darwin
-            cmakeextraflags: -DCMAKE_TOOLCHAIN_FILE=toolchain.txt
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt')
             freetype: true
             openssl: true
     env:
@@ -412,6 +412,8 @@ jobs:
             triple: aarch64-linux-gnu
             container: '{ "image": "ubuntu:18.04" }'
             deps: |
+              apt-get update
+              apt-get install lsb-release
               dpkg --add-architecture arm64
               bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
               bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
