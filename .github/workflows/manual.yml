@@ -744,7 +744,7 @@ jobs:
         curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage --output appimagetool.AppImage
         chmod +x appimagetool.AppImage
         curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${{ matrix.appimagetoolruntimearch }} --output runtime
-
+        $Env:PATH='/usr/lib/${{ matrix.triple }}/qt5/bin/:' + $Env:PATH
         # $INSDIR = (Get-Location).ToString() + "/output"
         ./linuxdeploy.AppImage --appdir $PWD/appdir -i $PWD/appdir/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/appdir/usr/share/applications/mcpelauncher-ui-qt.desktop
         $Env:QML_SOURCES_PATHS='mcpelauncher-ui/mcpelauncher-ui-qt/qml/'
