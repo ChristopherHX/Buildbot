@@ -668,6 +668,7 @@ jobs:
             linuxdeploytoolarch: i386
             appimagetoolruntimearch: arm
             deps: |
+              sudo cp ldd /usr/bin/ldd
               sudo dpkg --add-architecture armhf
               sudo dpkg --add-architecture i386
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
@@ -707,6 +708,8 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     # container: ${{ fromJson(matrix.container) }}
     steps:
+    # needed for ldd hack
+    - uses: actions/checkout@v2
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
