@@ -720,7 +720,7 @@ jobs:
         chmod +x linuxdeploy-plugin-qt.AppImage
         # $INSDIR = (Get-Location).ToString() + "/output"
         ./linuxdeploy.AppImage --appdir $PWD -i $PWD/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/usr/share/applications/mcpelauncher-ui-qt.desktop
-        $Env:QML_SOURCES_PATHS=mcpelauncher-ui/mcpelauncher-ui-qt/qml/
+        $Env:QML_SOURCES_PATHS='mcpelauncher-ui/mcpelauncher-ui-qt/qml/'
         ./linuxdeploy-plugin-qt.AppImage --appdir $PWD
         mkdir -p ./usr/lib/
         cp -r /usr/lib/${{ matrix.triple }}/nss ./usr/lib/
