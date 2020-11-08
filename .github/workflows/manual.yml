@@ -504,7 +504,7 @@ jobs:
             triple: i386-linux-gnu
             freetype: false
             openssl: false
-            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/
+            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
           - AppImage: false
             OS: ubuntu-latest
             arch: arm64
@@ -524,7 +524,7 @@ jobs:
               sudo apt-get install -y qttools5-dev g++-aarch64-linux-gnu libstdc++-8-dev:arm64 libssl-dev:arm64 libcurl4-openssl-dev:arm64 libuv1-dev:arm64 libzip-dev:arm64 libprotobuf-dev:arm64 protobuf-compiler qtbase5-dev:arm64 qtwebengine5-dev:arm64 qtdeclarative5-dev:arm64 libqt5svg5-dev:arm64 qml-module-qtquick2:arm64 qml-module-qtquick-layouts:arm64 qml-module-qtquick-controls:arm64 qml-module-qtquick-controls2:arm64 qml-module-qtquick-window2:arm64 qml-module-qtquick-dialogs:arm64 qml-module-qt-labs-settings:arm64 qml-module-qt-labs-folderlistmodel:arm64
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
             envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
             freetype: false
             openssl: false
@@ -547,7 +547,7 @@ jobs:
               sudo apt-get install -y qttools5-dev g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
             envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
             freetype: false
             openssl: false
