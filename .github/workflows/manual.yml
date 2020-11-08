@@ -314,7 +314,6 @@ jobs:
             arch: arm64
             triple: aarch64-linux-gnu
             deps: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
               sudo dpkg --add-architecture arm64
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
@@ -338,7 +337,6 @@ jobs:
             arch: armhf
             triple: arm-linux-gnueabihf
             deps: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
               sudo dpkg --add-architecture armhf
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
@@ -642,6 +640,7 @@ jobs:
             linuxdeploytoolarch: x86_64
             appimagetoolruntimearch: aarch64
             deps: |
+              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
               sudo cp ldd /usr/bin/ldd
               chmod +x /usr/bin/ldd
               sudo dpkg --add-architecture arm64
@@ -670,6 +669,7 @@ jobs:
             linuxdeploytoolarch: i386
             appimagetoolruntimearch: armhf
             deps: |
+              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
               sudo cp ldd /usr/bin/ldd
               chmod +x /usr/bin/ldd
               sudo dpkg --add-architecture armhf
