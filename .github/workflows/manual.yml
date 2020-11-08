@@ -627,7 +627,7 @@ jobs:
             deps: |
               sudo dpkg --add-architecture i386
               sudo apt-get update
-              sudo apt-get install -y g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
+              sudo apt-get install -y libfuse2:i386 g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
             triple: i386-linux-gnu
             freetype: false
             openssl: false
@@ -677,7 +677,7 @@ jobs:
               sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo apt-get update -y
               # sudo apt remove '*-dev'
-              sudo apt-get install -y g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
+              sudo apt-get install -y libfuse2:i386 g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
