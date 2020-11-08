@@ -489,7 +489,7 @@ jobs:
             arch: amd64
             container: '{}'
             deps: |
-              sudo apt-get install -y qttools5-dev-tools libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
+              sudo apt-get install -y qttools5-dev libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
             triple: x86_64-linux-gnu
             freetype: false
             openssl: false
@@ -500,7 +500,7 @@ jobs:
             deps: |
               sudo dpkg --add-architecture i386
               sudo apt-get update
-              sudo apt-get install -y qttools5-dev-tools g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
+              sudo apt-get install -y qttools5-dev g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
             triple: i386-linux-gnu
             freetype: false
             openssl: false
@@ -521,7 +521,7 @@ jobs:
               sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo apt-get update -y
               # sudo apt remove '*-dev'
-              sudo apt-get install -y qttools5-dev-tools g++-aarch64-linux-gnu libstdc++-8-dev:arm64 libssl-dev:arm64 libcurl4-openssl-dev:arm64 libuv1-dev:arm64 libzip-dev:arm64 libprotobuf-dev:arm64 protobuf-compiler qtbase5-dev:arm64 qtwebengine5-dev:arm64 qtdeclarative5-dev:arm64 libqt5svg5-dev:arm64 qml-module-qtquick2:arm64 qml-module-qtquick-layouts:arm64 qml-module-qtquick-controls:arm64 qml-module-qtquick-controls2:arm64 qml-module-qtquick-window2:arm64 qml-module-qtquick-dialogs:arm64 qml-module-qt-labs-settings:arm64 qml-module-qt-labs-folderlistmodel:arm64
+              sudo apt-get install -y qttools5-dev g++-aarch64-linux-gnu libstdc++-8-dev:arm64 libssl-dev:arm64 libcurl4-openssl-dev:arm64 libuv1-dev:arm64 libzip-dev:arm64 libprotobuf-dev:arm64 protobuf-compiler qtbase5-dev:arm64 qtwebengine5-dev:arm64 qtdeclarative5-dev:arm64 libqt5svg5-dev:arm64 qml-module-qtquick2:arm64 qml-module-qtquick-layouts:arm64 qml-module-qtquick-controls:arm64 qml-module-qtquick-controls2:arm64 qml-module-qtquick-window2:arm64 qml-module-qtquick-dialogs:arm64 qml-module-qt-labs-settings:arm64 qml-module-qt-labs-folderlistmodel:arm64
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
@@ -544,7 +544,7 @@ jobs:
               sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
               sudo apt-get update -y
               # sudo apt remove '*-dev'
-              sudo apt-get install -y qttools5-dev-tools g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
+              sudo apt-get install -y qttools5-dev g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
