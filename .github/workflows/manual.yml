@@ -703,6 +703,10 @@ jobs:
       id: mcpelauncher-ui
       with:
         name: mcpelauncher-ui-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: usr/
+    - name: Cloning mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
+      shell: pwsh
+      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-ui-manifest-ref }} mcpelauncher-ui
     - name: Building AppImage Binary
       shell: pwsh
       env:
@@ -716,6 +720,7 @@ jobs:
         chmod +x linuxdeploy-plugin-qt.AppImage
         # $INSDIR = (Get-Location).ToString() + "/output"
         ./linuxdeploy.AppImage --appdir $PWD -i $PWD/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/share/applications/mcpelauncher-ui-qt.desktop
+        $Env:QML_SOURCES_PATHS=mcpelauncher-ui/mcpelauncher-ui-qt/qml/
         ./linuxdeploy-plugin-qt.AppImage --appdir $PWD
         mkdir -p ./usr/lib/
         cp -r /usr/lib/${{ matrix.triple }}/nss ./usr/lib/
