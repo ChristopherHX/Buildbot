@@ -597,7 +597,8 @@ jobs:
         path: output/
   mcpelauncher-appimage:
     runs-on: ${{ matrix.OS }}
-    needs: [ "build", "mcpelauncher-ui" ]
+#     "build", 
+    needs: [ "mcpelauncher-ui" ]
     strategy:
       fail-fast: false
       matrix:
