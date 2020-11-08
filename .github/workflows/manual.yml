@@ -610,6 +610,7 @@ jobs:
             arch: amd64
             linuxdeployarch: x86_64
             linuxdeploytoolarch: x86_64
+            appimagetoolruntimearch: x86_64
             container: '{}'
             deps: |
               sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
@@ -621,6 +622,7 @@ jobs:
             arch: i386
             linuxdeployarch: i386
             linuxdeploytoolarch: i386
+            appimagetoolruntimearch: i686
             container: '{}'
             deps: |
               sudo dpkg --add-architecture i386
@@ -636,6 +638,7 @@ jobs:
             triple: aarch64-linux-gnu
             linuxdeployarch: arm_aarch64
             linuxdeploytoolarch: x86_64
+            appimagetoolruntimearch: aarch64
             deps: |
               sudo dpkg --add-architecture arm64
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
@@ -661,6 +664,7 @@ jobs:
             triple: arm-linux-gnueabihf
             linuxdeployarch: arm
             linuxdeploytoolarch: i386
+            appimagetoolruntimearch: arm
             deps: |
               sudo dpkg --add-architecture armhf
               sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
@@ -727,13 +731,17 @@ jobs:
         chmod +x linuxdeploy.AppImage
         curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy-plugin-qt.AppImage
         chmod +x linuxdeploy-plugin-qt.AppImage
+        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage --output appimagetool.AppImage
+        chmod +x appimagetool.AppImage
+        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${{ matrix.appimagetoolruntimearch }} --output runtime
+
         # $INSDIR = (Get-Location).ToString() + "/output"
         ./linuxdeploy.AppImage --appdir $PWD/appdir -i $PWD/appdir/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/appdir/usr/share/applications/mcpelauncher-ui-qt.desktop
         $Env:QML_SOURCES_PATHS='mcpelauncher-ui/mcpelauncher-ui-qt/qml/'
         ./linuxdeploy-plugin-qt.AppImage --appdir $PWD/appdir
         mkdir -p $PWD/appdir/usr/lib/
         cp -r /usr/lib/${{ matrix.triple }}/nss $PWD/appdir/usr/lib/
-        ./linuxdeploy.AppImage --appdir $PWD/appdir --output appimage
+        ./appimagetool.AppImage --comp xz --runtime-file runtime $PWD/appdir $OUTPUT
     - name: Upload AppImage Binary
       uses: actions/upload-artifact@v2
       with:
