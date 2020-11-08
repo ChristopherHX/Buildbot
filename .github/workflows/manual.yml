@@ -668,7 +668,7 @@ jobs:
             triple: arm-linux-gnueabihf
             linuxdeployarch: arm
             linuxdeploytoolarch: i386
-            appimagetoolruntimearch: arm
+            appimagetoolruntimearch: armhf
             deps: |
               sudo cp ldd /usr/bin/ldd
               chmod +x /usr/bin/ldd
