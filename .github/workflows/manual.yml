@@ -726,6 +726,7 @@ jobs:
         ARCH: ${{ matrix.linuxdeployarch }}
         BUILD_NUM: ${GITHUB_RUN_NUMBER}
         OUTPUT: Minecraft_Bedrock_Launcher-${{ matrix.arch }}-build-0.AppImage
+        QMAKE: /usr/bin/${{ matrix.triple }}-qmake
       run: |
         curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy.AppImage
         chmod +x linuxdeploy.AppImage
