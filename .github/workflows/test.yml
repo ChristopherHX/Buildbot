@@ -28,7 +28,7 @@ jobs:
               ldd -v /lib/arm-linux-gnueabihf/libc.so.6
               curl -L https://github.com/ChristopherHX/Buildbot/releases/download/v0.0.0/mcpelauncher-ui-qt --output mcpelauncher-ui-qt
               chmod +x mcpelauncher-ui-qt
-              ldd -v mcpelauncher-ui-qt
-              echo $?
+              # ldd -v mcpelauncher-ui-qt
+              # echo $?
               ./mcpelauncher-ui-qt
               echo $?
