@@ -5,12 +5,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: "ubuntu:18.04"
-    services:
-      qemu:
-        image: multiarch/qemu-user-static
-        options: --privileged --entrypoint="/register --reset -p yes"
+    # services:
+    #   qemu:
+    #     image: multiarch/qemu-user-static
+    #     
+    #     options: --privileged -- --reset -p yes"
     steps:
-    #- run: docker run multiarch/qemu-user-static --reset -p yes
+    - name: setup multarch
+      uses: docker://docker
+      with:
+        args: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    #- run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - uses: actions/checkout@v2
     - run: |
               sudo cp ldd /usr/bin/ldd
