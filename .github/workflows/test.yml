@@ -26,4 +26,7 @@ jobs:
               sudo apt-get install -y libc6:arm64 libc6:armhf
               ldd -v /lib/aarch64-linux-gnu/libdl.so.2
               ldd -v /lib/arm-linux-gnueabihf/libc.so.6
-              
+              curl -L https://github.com/ChristopherHX/Buildbot/suites/1469681398/artifacts/25274951 --output ui.zip
+              unzip ui.zip
+              ldd -v bin/mcpelauncher-ui-qt
+              echo $?
