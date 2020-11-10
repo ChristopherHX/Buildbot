@@ -329,7 +329,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
           - AppImage: false
@@ -352,7 +352,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
             cflags: -march=armv7 -mfpu=neon
@@ -504,7 +504,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
           - AppImage: false
@@ -527,7 +527,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
             cflags: -march=armv7 -mfpu=neon
@@ -658,7 +658,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
           - AppImage: false
@@ -688,7 +688,7 @@ jobs:
               echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-fuse-ld=lld -latomic'
+            envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
             cflags: -march=armv7 -mfpu=neon
