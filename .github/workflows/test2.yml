@@ -197,7 +197,7 @@ jobs:
   mcpelauncher-appimage:
     runs-on: ${{ matrix.OS }}
 #     "build", 
-    needs: [ "mcpelauncher-ui" ]
+    needs: [ "mcpelauncher-ui", "build" ]
     strategy:
       fail-fast: false
       matrix:
@@ -243,11 +243,11 @@ jobs:
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
-#     - uses: actions/download-artifact@v2
-#       id: mcpelauncher
-#       with:
-#         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-#         path: appdir/usr/
+    - uses: actions/download-artifact@v2
+      id: mcpelauncher
+      with:
+        name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: appdir/usr/
     - uses: actions/download-artifact@v2
       id: mcpelauncher-ui
       with:
@@ -263,6 +263,7 @@ jobs:
         BUILD_NUM: ${GITHUB_RUN_NUMBER}
         OUTPUT: Minecraft_Bedrock_Launcher-${{ matrix.arch }}-build-0.AppImage
         QMAKE: /usr/bin/${{ matrix.triple }}-qmake
+        NO_STRIP: "1"
       run: |
         curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy.AppImage
         chmod +x linuxdeploy.AppImage
