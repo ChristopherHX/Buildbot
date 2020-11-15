@@ -52,8 +52,8 @@ jobs:
             openssl: false
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      CC: gcc-aarch64-linux-gnu
-      CXX: g++-aarch64-linux-gnu
+      CC: aarch64-linux-gnu-gcc
+      CXX: aarch64-linux-gnu-g++
       DEBIAN_FRONTEND: noninteractive
     # container: ${{ fromJson(matrix.container) }}
     steps:
@@ -163,8 +163,8 @@ jobs:
     - name: Building mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
       shell: pwsh
       env:
-        CC: gcc-aarch64-linux-gnu
-        CXX: g++-aarch64-linux-gnu
+        CC: aarch64-linux-gnu-gcc
+        CXX: aarch64-linux-gnu-g++
       run: |
         if ('${{ matrix.sdkroot }}' -ne '') {
           if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
@@ -202,35 +202,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          #- AppImage: true
-          #  OS: ubuntu-latest
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: amd64
-            linuxdeployarch: x86_64
-            linuxdeploytoolarch: x86_64
-            appimagetoolruntimearch: x86_64
-            container: '{}'
-            deps: |
-              sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
-            triple: x86_64-linux-gnu
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: i386
-            linuxdeployarch: i386
-            linuxdeploytoolarch: i386
-            appimagetoolruntimearch: i686
-            container: '{}'
-            deps: |
-              sudo dpkg --add-architecture i386
-              sudo apt-get update
-              sudo apt-get install -y libfuse2:i386 g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
-            triple: i386-linux-gnu
-            freetype: false
-            openssl: false
-            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
           - AppImage: false
             OS: ubuntu-latest
             arch: arm64
@@ -260,49 +231,6 @@ jobs:
             envflags: $Env:LDFLAGS = '-latomic'
             freetype: false
             openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: armhf
-            triple: arm-linux-gnueabihf
-            linuxdeployarch: arm
-            linuxdeploytoolarch: i386
-            appimagetoolruntimearch: armhf
-            deps: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-              sudo cp ldd /usr/bin/ldd
-              sudo chmod +x /usr/bin/ldd
-              sudo dpkg --add-architecture armhf
-              sudo dpkg --add-architecture i386
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y libfuse2:i386 qtdeclarative5-dev-tools:armhf qtchooser:armhf qt5-default:armhf g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-            cflags: -march=armv7 -mfpu=neon
-            cxxflags: -march=armv7 -mfpu=neon
-          # - AppImage: false
-          #   OS: macos-latest
-          #   arch: x86_64
-          #   version: "10.10"
-          #   sdkroot: ../MacOSX-SDKs/MacOSX10.14.sdk
-          #   triple: x86_64-apple-darwin
-          #   freetype: true
-          #   openssl: true
-          #   container: '{}'
-          #   deps: |
-          #     brew install autoconf automake
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       CC: clang
