@@ -1,4 +1,4 @@
-name: Manual Build
+name: Manual Build 2
 on:
   workflow_dispatch:
     # Inputs the workflow accepts.
