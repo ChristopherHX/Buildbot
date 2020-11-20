@@ -196,8 +196,7 @@ jobs:
         path: output/
   mcpelauncher-appimage:
     runs-on: ${{ matrix.OS }}
-#     "build", 
-    needs: [ "mcpelauncher-ui" ]
+    needs: [ "build", "mcpelauncher-ui" ]
     strategy:
       fail-fast: false
       matrix:
@@ -243,11 +242,11 @@ jobs:
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
-#     - uses: actions/download-artifact@v2
-#       id: mcpelauncher
-#       with:
-#         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-#         path: appdir/usr/
+    - uses: actions/download-artifact@v2
+      id: mcpelauncher
+      with:
+        name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: appdir/usr/
     - uses: actions/download-artifact@v2
       id: mcpelauncher-ui
       with:
