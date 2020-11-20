@@ -51,17 +51,20 @@ jobs:
         # PATCHELF: 
       run: |
         curl -L https://github.com/ChristopherHX/Buildbot/releases/download/v0.0.0/mcpelauncher-ui-ubuntu-latest--arm64.zip --output x.zip
+        mkdir appdir
+        pushd appdir
         mkdir usr
         pushd usr
-        unzip ../x.zip
+        unzip ../../x.zip
         popd
-        curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy.AppImage
+        popd
+        curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage --output linuxdeploy.AppImage
         chmod +x linuxdeploy.AppImage
-        curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy-plugin-qt.AppImage
+        curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage --output linuxdeploy-plugin-qt.AppImage
         chmod +x linuxdeploy-plugin-qt.AppImage
         curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage --output appimagetool.AppImage
         chmod +x appimagetool.AppImage
-        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${{ matrix.appimagetoolruntimearch }} --output runtime
+        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64 --output runtime
         $Env:PATH='/usr/lib/${{ matrix.triple }}/qt5/bin/:' + $Env:PATH
         # $INSDIR = (Get-Location).ToString() + "/output"
         ./linuxdeploy.AppImage --appdir $PWD/appdir -i $PWD/appdir/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/appdir/usr/share/applications/mcpelauncher-ui-qt.desktop
