@@ -42,4 +42,36 @@ jobs:
               chmod +x mcpelauncher-ui-qt
               ldd -v mcpelauncher-ui-qt || echo $?
               ./mcpelauncher-ui-qt || echo $?
-        
+    - name: Cloning mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
+      shell: pwsh
+      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-ui-manifest-ref }} mcpelauncher-ui
+    - name: Building AppImage Binary
+      shell: pwsh
+      env:
+        ARCH: ${{ matrix.linuxdeployarch }}
+        BUILD_NUM: ${GITHUB_RUN_NUMBER}
+        OUTPUT: Minecraft_Bedrock_Launcher-${{ matrix.arch }}-build-0.AppImage
+        QMAKE: /usr/bin/${{ matrix.triple }}-qmake
+        NO_STRIP: "1"
+        # PATCHELF: 
+      run: |
+        curl -L https://github.com/ChristopherHX/Buildbot/releases/download/v0.0.0/mcpelauncher-ui-ubuntu-latest--arm64.zip --output x.zip
+        mkdir usr
+        pushd usr
+        unzip ../x.zip
+        popd
+        curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy.AppImage
+        chmod +x linuxdeploy.AppImage
+        curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy-plugin-qt.AppImage
+        chmod +x linuxdeploy-plugin-qt.AppImage
+        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage --output appimagetool.AppImage
+        chmod +x appimagetool.AppImage
+        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${{ matrix.appimagetoolruntimearch }} --output runtime
+        $Env:PATH='/usr/lib/${{ matrix.triple }}/qt5/bin/:' + $Env:PATH
+        # $INSDIR = (Get-Location).ToString() + "/output"
+        ./linuxdeploy.AppImage --appdir $PWD/appdir -i $PWD/appdir/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/appdir/usr/share/applications/mcpelauncher-ui-qt.desktop
+        $Env:QML_SOURCES_PATHS='mcpelauncher-ui/mcpelauncher-ui-qt/qml/'
+        ./linuxdeploy-plugin-qt.AppImage --appdir $PWD/appdir
+        mkdir -p $PWD/appdir/usr/lib/
+        cp -r /usr/lib/${{ matrix.triple }}/nss $PWD/appdir/usr/lib/
+        ./appimagetool.AppImage --comp xz --runtime-file runtime $PWD/appdir $OUTPUT
