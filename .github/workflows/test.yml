@@ -37,9 +37,9 @@ jobs:
               chmod +x mcpelauncher-ui-qt
               ldd -v mcpelauncher-ui-qt || echo $?
               ./mcpelauncher-ui-qt || echo $?
-    - name: Cloning mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
+    - name: Cloning mcpelauncher-ui
       shell: pwsh
-      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-ui-manifest-ref }} mcpelauncher-ui
+      run: git clone --recursive https://github.com/minecraft-linux/mcpelauncher-ui-manifest -b ng mcpelauncher-ui
     - name: Building AppImage Binary
       shell: pwsh
       env:
