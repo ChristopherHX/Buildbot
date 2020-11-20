@@ -163,8 +163,8 @@ jobs:
     - name: Building mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
       shell: pwsh
       env:
-        CC: aarch64-linux-gnu-gcc
-        CXX: aarch64-linux-gnu-g++
+        CC: clang
+        CXX: clang++
       run: |
         if ('${{ matrix.sdkroot }}' -ne '') {
           if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
@@ -185,7 +185,7 @@ jobs:
           }
           $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
         }
-        cmake ../mcpelauncher-ui -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_C_FLAGS="${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
+        cmake ../mcpelauncher-ui -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
         make install -j4
         popd
         popd
