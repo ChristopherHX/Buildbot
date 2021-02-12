@@ -1,0 +1,54 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: 'false'
+      matrix:
+        branch: [ 'cxxjit', 'cxxjit-9.0', 'cxxjit-ni-9.0' ]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+      # Runs a single command using the runners shell
+      - name: clone
+        run: git clone https://github.com/hfinkel/llvm-project-cxxjit.git -b ${{matrix.branch}} llvm-project
+
+      - name: Run a multi-line script
+        run: sudo apt install -y cmake build-essential gcc g++ clang clang++
+      - if: allways()
+        run: |
+          mkdir build
+          mkdir rel
+          pushd build
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DLLVM_USE_SPLIT_DWARF=ON -DCMAKE_INSTALL_PREFIX=$PWD/../rel -DLLVM_ENABLE_PROJECTS="llvm;clang;ldd;openmp" ../llvm-project/llvm
+          make install -j8
+          popd
+          tar -zcvf rel.tar.gz rel
+      - if: allways()
+        uses: actions/upload-artifact@v2
+        with:
+          name: llvm-rel-tar-${{matrix.branch}}
+          path: rel.tar.gz
+      - if: allways()
+        uses: actions/upload-artifact@v2
+        with:
+          name: llvm-rel-${{matrix.branch}}
+          path: rel/
+      - if: allways()
+        uses: actions/upload-artifact@v2
+        with:
+          name: llvm-build-${{matrix.branch}}
+          path: build/
