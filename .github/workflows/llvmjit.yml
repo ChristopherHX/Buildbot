@@ -13,7 +13,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
@@ -26,15 +26,15 @@ jobs:
       - name: clone
         run: git clone https://github.com/hfinkel/llvm-project-cxxjit.git -b ${{matrix.branch}} llvm-project
 
-      - name: Run a multi-line script
-        run: sudo apt install -y cmake build-essential gcc g++ clang clang++
+      - name: Add msbuild to PATH
+        uses: ilammy/msvc-dev-cmd@v1
       - if: always()
         run: |
           mkdir build
           mkdir rel
           pushd build
-          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DLLVM_USE_SPLIT_DWARF=ON -DCMAKE_INSTALL_PREFIX=$PWD/../rel -DLLVM_ENABLE_PROJECTS="llvm;clang;ldd;openmp" ../llvm-project/llvm
-          make install -j8
+          cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PWD/../rel -DLLVM_ENABLE_PROJECTS="llvm;clang;ldd" ../llvm-project/llvm
+          nmake
           popd
           tar -zcvf rel.tar.gz rel
       - if: always()
