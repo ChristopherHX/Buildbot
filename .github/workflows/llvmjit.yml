@@ -28,7 +28,7 @@ jobs:
 
       - name: Run a multi-line script
         run: sudo apt install -y cmake build-essential gcc g++ clang clang++
-      - if: allways()
+      - if: always()
         run: |
           mkdir build
           mkdir rel
