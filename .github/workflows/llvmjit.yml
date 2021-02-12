@@ -37,17 +37,17 @@ jobs:
           make install -j8
           popd
           tar -zcvf rel.tar.gz rel
-      - if: allways()
+      - if: always()
         uses: actions/upload-artifact@v2
         with:
           name: llvm-rel-tar-${{matrix.branch}}
           path: rel.tar.gz
-      - if: allways()
+      - if: always()
         uses: actions/upload-artifact@v2
         with:
           name: llvm-rel-${{matrix.branch}}
           path: rel/
-      - if: allways()
+      - if: always()
         uses: actions/upload-artifact@v2
         with:
           name: llvm-build-${{matrix.branch}}
