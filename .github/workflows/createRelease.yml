@@ -38,8 +38,8 @@ jobs:
             ${{ secrets.SSH_PRIVATE_KEY2 }}
       - name: setup git
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
       - name: osx
         run: |
           git clone git@github.com:ChristopherHX/osx-packaging-scripts.git -b feature-merge
