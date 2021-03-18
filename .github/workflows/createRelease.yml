@@ -1,0 +1,96 @@
+name: CreateRelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      msa:
+        description: 'Which msa to bundle and check for updates'
+        required: true
+        default: master
+      mcpelauncher:
+        description: 'Which mcpelauncher to bundle'
+        required: true
+        default: ng
+      mcpelauncher-ui:
+        description: 'Which mcpelauncher-ui to bundle'
+        required: true
+        default: ng
+      versiondb:
+        description: 'Which versiondb to bundle and check for updates'
+        required: true
+        default: master
+      changelog:
+        description: 'Changelog of this Release'
+        required: true
+      versionname:
+        description: 'Name / tag of this Release'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.1
+        with:
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            ${{ secrets.SSH_PRIVATE_KEY2 }}
+      - name: setup git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+      - name: osx
+        run: |
+          git clone git@github.com:ChristopherHX/osx-packaging-scripts.git -b feature-merge
+          pushd osx-packaging-scripts
+          echo ${{ github.event.inputs.msa }} > msa.commit
+          echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
+          echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
+          echo ${{ github.event.inputs.versionsdb }} > versionsdb.txt
+          echo ${{ github.event.inputs.changelog }} > changelog.txt
+          echo ${{ github.event.inputs.versionname }} > version.txt
+          git add .
+          git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
+          git push
+          popd
+      - name: linux-AppImage
+        run: |
+          git clone git@github.com:ChristopherHX/linux-packaging-scripts.git -b feature-jnivm
+          pushd linux-packaging-scripts
+          echo ${{ github.event.inputs.msa }} > msa.commit
+          echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
+          echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
+          echo ${{ github.event.inputs.versionsdb }} > versionsdb.txt
+          echo ${{ github.event.inputs.changelog }} > changelog.txt
+          echo ${{ github.event.inputs.versionname }} > version.txt
+          git add .
+          git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
+          git push
+          popd
+      - name: linux-flatpak-clone
+        run: |
+          git clone https://github.com/flathub/io.mrarm.mcpelauncher.git
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Update jsons
+        shell: python
+        run: |
+          obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
+          for module in obj['modules']:
+              for source in module['sources']:
+                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/msa-manifest.git':
+                      source['commit'] = '${{ github.event.inputs.msa }}'
+                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/mcpelauncher-manifest.git':
+                      source['commit'] = '${{ github.event.inputs.mcpelauncher }}'
+                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git':
+                      source['commit'] = '${{ github.event.inputs.mcpelauncher-ui }}'
+          
+          json.dump(obj, open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json', 'w'), indent=4)
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: flatpak
+          path: io.mrarm.mcpelauncher
