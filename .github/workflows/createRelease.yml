@@ -47,9 +47,9 @@ jobs:
           echo ${{ github.event.inputs.msa }} > msa.commit
           echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
           echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
-          echo ${{ github.event.inputs.versionsdb }} > versionsdb.txt
-          echo ${{ github.event.inputs.changelog }} > changelog.txt
-          echo ${{ github.event.inputs.versionname }} > version.txt
+          echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
+          echo '${{ github.event.inputs.changelog }}' > changelog.txt
+          echo '${{ github.event.inputs.versionname }}' > version.txt
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push
@@ -61,9 +61,9 @@ jobs:
           echo ${{ github.event.inputs.msa }} > msa.commit
           echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
           echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
-          echo ${{ github.event.inputs.versionsdb }} > versionsdb.txt
-          echo ${{ github.event.inputs.changelog }} > changelog.txt
-          echo ${{ github.event.inputs.versionname }} > version.txt
+          echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
+          echo '${{ github.event.inputs.changelog }}' > changelog.txt
+          echo '${{ github.event.inputs.versionname }}' > version.txt
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push
