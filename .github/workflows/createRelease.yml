@@ -78,6 +78,7 @@ jobs:
       - name: Update jsons
         shell: python
         run: |
+          import json
           obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
           for module in obj['modules']:
               for source in module['sources']:
