@@ -42,7 +42,7 @@ jobs:
           git config --global user.name "GitHub Action"
       - name: osx
         run: |
-          git clone git@github.com:ChristopherHX/osx-packaging-scripts.git -b feature-merge
+          git clone git@github.com:christopherhx/osx-packaging-scripts.git -b feature-merge
           pushd osx-packaging-scripts
           echo ${{ github.event.inputs.msa }} > msa.commit
           echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
@@ -56,7 +56,7 @@ jobs:
           popd
       - name: linux-AppImage
         run: |
-          git clone git@github.com:ChristopherHX/linux-packaging-scripts.git -b feature-jnivm
+          git clone git@github.com:christopherhx/linux-packaging-scripts.git -b feature-jnivm
           pushd linux-packaging-scripts
           echo ${{ github.event.inputs.msa }} > msa.commit
           echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
