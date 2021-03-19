@@ -122,7 +122,7 @@ jobs:
           releases.insert(0, rel)
           rel.set('version', '${{ github.event.inputs.versionname }}')
           rel.set('date', datetime.date.today().isoformat())
-          rel.append(ET.fromstring('<description>{{ github.event.inputs.changelog }}</description>'))
+          rel.append(ET.fromstring('<description>${{ github.event.inputs.changelog }}</description>'))
           ET.indent(tree, space='    ')
           tree.write('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.metainfo.xml', encoding='utf-8', xml_declaration=True)
       - name: linux-flatpak-push-commit
