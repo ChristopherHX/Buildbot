@@ -79,17 +79,47 @@ jobs:
         shell: python
         run: |
           import json
+          from subprocess import check_output, check_call, DEVNULL
+          import tempfile
+          import xml.etree.ElementTree as ET
+          import datetime
+          from itertools import filterfalse
+          
+          def GetCommitSha(url, ref):
+              with tempfile.TemporaryDirectory() as directory:
+                  check_call(['git', 'init'], cwd=directory, stdout=DEVNULL, stderr=DEVNULL)
+                  check_call(['git', 'remote', 'add', 'origin', url], cwd=directory)
+                  res = check_output(["git", "ls-remote", "origin", ref], cwd=directory).split(b'\t')[0].decode("utf-8")
+                  if len(res) == 0:
+                      return ref
+                  return res
+
+          def UpdateSource(source, url, ref):
+              if source['type'] == 'git' and source['url'] == url:
+                  source['commit'] = GetCommitSha(url, ref)
+          
           obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
           for module in obj['modules']:
               for source in module['sources']:
-                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/msa-manifest.git':
-                      source['commit'] = '${{ github.event.inputs.msa }}'
-                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/mcpelauncher-manifest.git':
-                      source['commit'] = '${{ github.event.inputs.mcpelauncher }}'
-                  if source['type'] == 'git' and source['url'] == 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git':
-                      source['commit'] = '${{ github.event.inputs.mcpelauncher-ui }}'
-          
+                  UpdateSource(source, 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
+                  UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher }}')
+                  UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
+                  mcpeui = 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git'
+                  UpdateSource(source, mcpeui, '${{ github.event.inputs.mcpelauncher-ui }}')
+                  if source['type'] == 'git' and source['url'] == mcpeui:
+                      module['config-opts'][:] = filterfalse(lambda x: x.startswith('-DLAUNCHER_VERSION_NAME=') or x.startswith('-DLAUNCHER_VERSION_CODE=') or x.startswith('-DLAUNCHER_CHANGE_LOG=') or x.startswith('-DLAUNCHER_VERSIONDB_URL='), module['config-opts'])
+                      module['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', '-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}', '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}/']
           json.dump(obj, open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json', 'w'), indent=4)
+          
+          tree = ET.parse('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.metainfo.xml')
+          root = tree.getroot()
+          releases = root.find('releases')
+          rel = ET.Element('release')
+          releases.insert(0, rel)
+          rel.set('version', '${{ github.event.inputs.versionname }}')
+          rel.set('date', datetime.date.today().isoformat())
+          rel.append(ET.fromstring('<description>{{ github.event.inputs.changelog }}</description>'))
+          tree.write('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.metainfo.xml')
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.2
         with:
