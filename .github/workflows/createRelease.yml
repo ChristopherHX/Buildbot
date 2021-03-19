@@ -36,11 +36,13 @@ jobs:
           ssh-private-key: |
             ${{ secrets.SSH_PRIVATE_KEY }}
             ${{ secrets.SSH_PRIVATE_KEY2 }}
+            ${{ secrets.SSH_PRIVATE_KEY3 }}
       - name: setup git
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
       - name: osx
+        if: 'false'
         run: |
           git clone git@github.com:christopherhx/osx-packaging-scripts.git -b feature-merge
           pushd osx-packaging-scripts
@@ -50,11 +52,13 @@ jobs:
           echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
+          git checkout -b 'release/${{ github.event.inputs.versionname }}'
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push
           popd
       - name: linux-AppImage
+        if: 'false'
         run: |
           git clone git@github.com:christopherhx/linux-packaging-scripts.git -b feature-jnivm
           pushd linux-packaging-scripts
@@ -64,17 +68,18 @@ jobs:
           echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
+          git checkout -b 'release/${{ github.event.inputs.versionname }}'
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push
           popd
       - name: linux-flatpak-clone
         run: |
-          git clone https://github.com/flathub/io.mrarm.mcpelauncher.git
-      - name: Set up Python 3.8
+          git clone git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Update jsons
         shell: python
         run: |
@@ -84,7 +89,7 @@ jobs:
           import xml.etree.ElementTree as ET
           import datetime
           from itertools import filterfalse
-          
+
           def GetCommitSha(url, ref):
               with tempfile.TemporaryDirectory() as directory:
                   check_call(['git', 'init'], cwd=directory, stdout=DEVNULL, stderr=DEVNULL)
@@ -97,7 +102,7 @@ jobs:
           def UpdateSource(source, url, ref):
               if source['type'] == 'git' and source['url'] == url:
                   source['commit'] = GetCommitSha(url, ref)
-          
+
           obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
           for module in obj['modules']:
               for source in module['sources']:
@@ -107,10 +112,11 @@ jobs:
                   mcpeui = 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git'
                   UpdateSource(source, mcpeui, '${{ github.event.inputs.mcpelauncher-ui }}')
                   if source['type'] == 'git' and source['url'] == mcpeui:
-                      module['config-opts'][:] = filterfalse(lambda x: x.startswith('-DLAUNCHER_VERSION_NAME=') or x.startswith('-DLAUNCHER_VERSION_CODE=') or x.startswith('-DLAUNCHER_CHANGE_LOG=') or x.startswith('-DLAUNCHER_VERSIONDB_URL='), module['config-opts'])
-                      module['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', '-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}', '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}/']
+                      module['build-options']['config-opts'][:] = filterfalse(lambda x: x.startswith('-DLAUNCHER_VERSION_NAME=') or x.startswith('-DLAUNCHER_VERSION_CODE=') or x.startswith('-DLAUNCHER_CHANGE_LOG=') or x.startswith('-DLAUNCHER_VERSIONDB_URL='), module['build-options']['config-opts'])
+                      module['build-options']['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', '-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}', '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}/']
+
           json.dump(obj, open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json', 'w'), indent=4)
-          
+
           tree = ET.parse('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.metainfo.xml')
           root = tree.getroot()
           releases = root.find('releases')
@@ -119,7 +125,16 @@ jobs:
           rel.set('version', '${{ github.event.inputs.versionname }}')
           rel.set('date', datetime.date.today().isoformat())
           rel.append(ET.fromstring('<description>{{ github.event.inputs.changelog }}</description>'))
+          ET.indent(tree, space='    ')
           tree.write('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.metainfo.xml')
+      - name: linux-flatpak-push-commit
+        run: |
+          pushd io.mrarm.mcpelauncher
+          git checkout -b 'release/${{ github.event.inputs.versionname }}'
+          git add .
+          git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
+          git push
+          popd
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.2
         with:
