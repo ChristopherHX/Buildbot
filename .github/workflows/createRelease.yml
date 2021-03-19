@@ -41,32 +41,80 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-      - name: osx
-        if: 'false'
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: osx 1/3
         run: |
           git clone git@github.com:christopherhx/osx-packaging-scripts.git -b feature-merge
           pushd osx-packaging-scripts
-          echo ${{ github.event.inputs.msa }} > msa.commit
-          echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
-          echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
-          echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
+          echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
+          popd
+      - name: osx 2/3
+        shell: python
+        run: |
+          from subprocess import check_output, check_call, DEVNULL
+          import tempfile
+
+          def GetCommitSha(url, ref):
+              with tempfile.TemporaryDirectory() as directory:
+                  check_call(['git', 'init'], cwd=directory, stdout=DEVNULL, stderr=DEVNULL)
+                  check_call(['git', 'remote', 'add', 'origin', url], cwd=directory)
+                  res = check_output(["git", "ls-remote", "origin", ref], cwd=directory).split(b'\t')[0].decode("utf-8")
+                  if len(res) == 0:
+                      return ref
+                  return res
+          def writeCommit(file, url, ref):
+              with open(file, 'w') as file:
+                  file.write(GetCommitSha(url, ref))
+         
+          writeCommit('osx-packaging-scripts/msa.commit', 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
+          writeCommit('osx-packaging-scripts/mcpelauncher.commit', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher }}')
+          writeCommit('osx-packaging-scripts/mcpelauncher-ui.commit', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', '${{ github.event.inputs.mcpelauncher-ui }}')
+          writeCommit('osx-packaging-scripts/versionsdb.txt', 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
+      - name: osx 3/3
+        run: |
+          pushd osx-packaging-scripts
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
-      - name: linux-AppImage
-        if: 'false'
+      - name: linux-AppImage 1/3
         run: |
           git clone git@github.com:christopherhx/linux-packaging-scripts.git -b feature-jnivm
           pushd linux-packaging-scripts
-          echo ${{ github.event.inputs.msa }} > msa.commit
-          echo ${{ github.event.inputs.mcpelauncher }} > mcpelauncher.commit
-          echo ${{ github.event.inputs.mcpelauncher-ui }} > mcpelauncher-ui.commit
-          echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
+          echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
+          popd
+      - name: linux-AppImage 2/3
+        shell: python
+        run: |
+          from subprocess import check_output, check_call, DEVNULL
+          import tempfile
+
+          def GetCommitSha(url, ref):
+              with tempfile.TemporaryDirectory() as directory:
+                  check_call(['git', 'init'], cwd=directory, stdout=DEVNULL, stderr=DEVNULL)
+                  check_call(['git', 'remote', 'add', 'origin', url], cwd=directory)
+                  res = check_output(["git", "ls-remote", "origin", ref], cwd=directory).split(b'\t')[0].decode("utf-8")
+                  if len(res) == 0:
+                      return ref
+                  return res
+          def writeCommit(file, url, ref):
+              with open(file, 'w') as file:
+                  file.write(GetCommitSha(url, ref))
+         
+          writeCommit('linux-packaging-scripts/msa.commit', 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
+          writeCommit('linux-packaging-scripts/mcpelauncher.commit', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher }}')
+          writeCommit('linux-packaging-scripts/mcpelauncher-ui.commit', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', '${{ github.event.inputs.mcpelauncher-ui }}')
+          writeCommit('linux-packaging-scripts/versionsdb.txt', 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
+      - name: linux-AppImage 3/3
+        run: |
+          pushd linux-packaging-scripts
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push origin HEAD:release/${{ github.event.inputs.versionname }}
@@ -74,10 +122,6 @@ jobs:
       - name: linux-flatpak-clone
         run: |
           git clone git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
       - name: Update jsons
         shell: python
         run: |
