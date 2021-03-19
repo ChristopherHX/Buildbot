@@ -52,10 +52,9 @@ jobs:
           echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
-          git checkout -b 'release/${{ github.event.inputs.versionname }}'
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
-          git push
+          git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
       - name: linux-AppImage
         if: 'false'
@@ -68,10 +67,9 @@ jobs:
           echo ${{ github.event.inputs.versiondb }} > versionsdb.txt
           echo '${{ github.event.inputs.changelog }}' > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
-          git checkout -b 'release/${{ github.event.inputs.versionname }}'
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
-          git push
+          git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
       - name: linux-flatpak-clone
         run: |
@@ -130,10 +128,9 @@ jobs:
       - name: linux-flatpak-push-commit
         run: |
           pushd io.mrarm.mcpelauncher
-          git checkout -b 'release/${{ github.event.inputs.versionname }}'
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
-          git push
+          git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.2
