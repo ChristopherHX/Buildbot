@@ -122,6 +122,7 @@ jobs:
       - name: linux-flatpak-clone
         run: |
           git clone git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
+          git remote set-url origin git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
       - name: Update jsons
         shell: python
         run: |
@@ -155,7 +156,7 @@ jobs:
                   UpdateSource(source, mcpeui, '${{ github.event.inputs.mcpelauncher-ui }}')
                   if source['type'] == 'git' and source['url'] == mcpeui:
                       module['build-options']['config-opts'][:] = filterfalse(lambda x: x.startswith('-DLAUNCHER_VERSION_NAME=') or x.startswith('-DLAUNCHER_VERSION_CODE=') or x.startswith('-DLAUNCHER_CHANGE_LOG=') or x.startswith('-DLAUNCHER_VERSIONDB_URL='), module['build-options']['config-opts'])
-                      module['build-options']['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', "-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}", '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}/']
+                      module['build-options']['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', "-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}", '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}']
 
           json.dump(obj, open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json', 'w'), indent=4)
 
