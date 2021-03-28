@@ -1,0 +1,7 @@
+on: pull_request
+jobs:
+    Test2:
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
+        runs-on: ubuntu-latest
+        steps:
+        - run: echo Hello World
