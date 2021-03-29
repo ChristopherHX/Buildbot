@@ -12,7 +12,7 @@ jobs:
                 - operatingSystem: 'windows-latest'
                   skip: ${{!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_windows]')}}
                 - operatingSystem: 'macos-latest'
-                  skip: ${{!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_mac]')}}
+                  skip: true
 
         steps:
         - name: hehe
