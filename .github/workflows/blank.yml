@@ -14,7 +14,7 @@ jobs:
           skip: true
         - operatingSystem: 'macos-latest'
           skip: true
-    runs-on: Linux
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
