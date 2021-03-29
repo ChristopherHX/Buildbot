@@ -10,9 +10,9 @@ jobs:
                 - operatingSystem: 'ubuntu-latest'
                   skip: ${{fromJSON(!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_linux]'))}}
                 - operatingSystem: 'windows-latest'
-                  skip: false
+                  skip: ${{fromJSON(!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_windows]'))}}
                 - operatingSystem: 'macos-latest'
-                  skip: true
+                  skip: ${{fromJSON(!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_mac]'))}}
 
         steps:
         - name: hehe
