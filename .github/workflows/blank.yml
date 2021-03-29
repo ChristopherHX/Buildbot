@@ -14,7 +14,7 @@ jobs:
           skip: true
         - operatingSystem: 'macos-latest'
           skip: true
-    runs-on: ${{ matrix.operatingSystem }}
+    runs-on: Linux
     timeout-minutes: 10
 
     steps:
