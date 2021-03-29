@@ -8,7 +8,7 @@ jobs:
               skip: [ true ]
               exclude:
                 - operatingSystem: 'ubuntu-latest'
-                  skip: true
+                  skip: ${{fromJSON(!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_linux]'))}}
                 - operatingSystem: 'windows-latest'
                   skip: false
                 - operatingSystem: 'macos-latest'
