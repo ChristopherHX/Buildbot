@@ -17,4 +17,4 @@ jobs:
         steps:
         - name: hehe
           run: |
-            echo other: ${{matrix.operatingSystem}}
+            echo other: ${{!contains(github.event.head_commit.message, '[ci]') && !contains(github.event.head_commit.message, '[ci_linux]')}}
