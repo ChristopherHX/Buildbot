@@ -122,7 +122,9 @@ jobs:
       - name: linux-flatpak-clone
         run: |
           git clone https://github.com/flathub/io.mrarm.mcpelauncher.git
+          pushd io.mrarm.mcpelauncher
           git remote set-url origin git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
+          popd
       - name: Update jsons
         shell: python
         run: |
