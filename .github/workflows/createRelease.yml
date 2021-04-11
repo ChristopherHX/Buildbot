@@ -47,7 +47,7 @@ jobs:
           python-version: 3.9
       - name: osx 1/3
         run: |
-          git clone git@github.com:christopherhx/osx-packaging-scripts.git -b feature-merge
+          git clone git@github.com:christopherhx/osx-packaging-scripts.git
           pushd osx-packaging-scripts
           echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo "${{ github.event.inputs.changelog }}" > changelog.txt
@@ -84,7 +84,7 @@ jobs:
           popd
       - name: linux-AppImage 1/3
         run: |
-          git clone git@github.com:christopherhx/linux-packaging-scripts.git -b feature-jnivm
+          git clone git@github.com:christopherhx/linux-packaging-scripts.git
           pushd linux-packaging-scripts
           echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo "${{ github.event.inputs.changelog }}" > changelog.txt
@@ -121,7 +121,7 @@ jobs:
           popd
       - name: linux-flatpak-clone
         run: |
-          git clone git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
+          git clone https://github.com/flathub/io.mrarm.mcpelauncher.git
           git remote set-url origin git@github.com:minecraft-linux/io.mrarm.mcpelauncher.git
       - name: Update jsons
         shell: python
