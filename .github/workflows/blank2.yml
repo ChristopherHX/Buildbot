@@ -1,0 +1,12 @@
+on: push
+jobs:
+  my-jobname:
+    runs-on: ubuntu-latest
+    env:
+       HAVE_SONAR_TOKEN: ${{ secrets.SONAR_TOKEN != '' }}
+    steps:
+      - name: Submit sonar qube report
+        if: ${{ env.HAVE_SONAR_TOKEN == 'true' }}
+        run: echo "I have the token!"
+        env:
+           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
