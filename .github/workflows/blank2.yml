@@ -10,3 +10,4 @@ jobs:
         run: echo "I have the token!"
         env:
            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+ 
