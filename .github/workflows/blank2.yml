@@ -13,7 +13,7 @@ jobs:
         run: exit 1
   failure2:
     needs: failure1
-    if: ${{ allways() }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Ok
