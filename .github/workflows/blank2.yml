@@ -1,0 +1,29 @@
+# This is a basic workflow to help you get started with Actions
+
+name: jobsuccessandfailure
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  failure1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail
+        run: exit 1
+  failure2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail
+        run: exit 1
+  success2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ok
+        run: echo Ok
+  suc:
+    needs: [ failure1, failure2, success2]
+    if: ${{ success('success2') && failure('failure1', 'failure2') }}
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo On Failure
