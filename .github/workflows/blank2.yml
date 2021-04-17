@@ -32,7 +32,6 @@ jobs:
         run: echo Ok
   suc:
     needs: [ failure2, success2]
-    if: ${{ success('success2') && failure('failure1') }}
     runs-on: ubuntu-latest
     steps:
     - run: echo ${{needs.success1.outputs.test}}
