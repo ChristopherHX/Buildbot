@@ -9,8 +9,8 @@ jobs:
   failure1:
     runs-on: ubuntu-latest
     steps:
-      - name: Fail
-        run: exit 1
+      - name: Ok
+        run: echo Ok
   failure2:
     runs-on: ubuntu-latest
     steps:
