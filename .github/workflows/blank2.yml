@@ -6,13 +6,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  success1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ok
+        run: echo Ok
+    outputs:
+      test: "Hello World"
   failure1:
     runs-on: ubuntu-latest
     steps:
       - name: Ok
         run: exit 1
   failure2:
-    needs: failure1
+    needs: [failure1, success1]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -28,4 +35,4 @@ jobs:
     if: ${{ success('success2') && failure('failure1') }}
     runs-on: ubuntu-latest
     steps:
-    - run: echo On Failure
+    - run: echo ${{needs.success1.outputs.test}}
