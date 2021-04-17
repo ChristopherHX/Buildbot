@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ok
-        run: echo Ok
+        run: exit 1
   failure2:
+    needs: failure1
+    if: ${{ allways() }}
     runs-on: ubuntu-latest
     steps:
       - name: Ok
@@ -22,8 +24,8 @@ jobs:
       - name: Ok
         run: echo Ok
   suc:
-    needs: [ failure1, failure2, success2]
-    if: ${{ success('success2') && failure('failure1', 'failure2') }}
+    needs: [ failure2, success2]
+    if: ${{ success('success2') && failure('failure1') }}
     runs-on: ubuntu-latest
     steps:
     - run: echo On Failure
