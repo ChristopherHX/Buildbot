@@ -14,8 +14,8 @@ jobs:
   failure2:
     runs-on: ubuntu-latest
     steps:
-      - name: Fail
-        run: exit 1
+      - name: Ok
+        run: echo Ok
   success2:
     runs-on: ubuntu-latest
     steps:
