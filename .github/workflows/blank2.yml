@@ -18,6 +18,7 @@ jobs:
     steps:
       - name: Ok
         run: exit 1
+    continue-on-error: true
   failure2:
     needs: [failure1, success1]
     if: ${{ always() }}
