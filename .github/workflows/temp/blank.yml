@@ -1,5 +1,5 @@
 # This is a basic workflow to help you get started with Actions
-
+name: subfolder
 
 # Controls when the action will run. 
 on:
@@ -26,5 +26,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          echo Hi
