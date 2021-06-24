@@ -1,0 +1,18 @@
+runs:
+  using: composite
+  steps:
+  # - uses: actions/checkout@v2
+  #   with:
+  #     path: testb
+  - run: node --version
+    shell: powershell
+  # - run: git clone https://github.com/actions/setup-node -b v2 ..\..\_actions\actions\setup-node\v2
+  #   shell: powershell
+  - uses: actions/setup-node@v2
+    with:
+      node-version: '16'
+  - run: |
+      console.log("Hi from node")
+    shell: node {0}
+  - run: node --version
+    shell: powershell
