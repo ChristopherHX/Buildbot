@@ -1,22 +1,9 @@
-name: Test Build
+name: Test reusable
 on:
-  workflow_dispatch:
+  push:
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    # container: "buildpack-deps:buster"
-    # services:
-    #   qemu:
-    #     image: multiarch/qemu-user-static
-    #     
-    #     options: --privileged -- --reset -p yes"
-    steps:
-    # - name: setup multarch
-    #   uses: docker://docker
-    #   with:
-    #     args: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    #- run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - uses: actions/checkout@v2
-    - run: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-              docker run -e GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER} -v $PWD:$PWD -w $PWD --rm buildpack-deps:buster bash ./testlld.sh
+  _:
+    permissions:
+      id-token: write
+      contents: write
+    uses: ChristopherHX/newcomposite-sample/.github/workflows/main.yml@local-actions-with-reusable
