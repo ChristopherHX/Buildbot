@@ -3,6 +3,7 @@ on:
   push:
 jobs:
   _:
+    permissions: read-all
     #permissions:
     #  id-token: write
     #  contents: write
