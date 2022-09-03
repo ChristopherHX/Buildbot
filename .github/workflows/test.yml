@@ -3,8 +3,4 @@ on:
   push:
 jobs:
   _:
-    permissions: read-all
-    #permissions:
-    #  id-token: write
-    #  contents: write
-    uses: ChristopherHX/newcomposite-sample/.github/workflows/main.yml@local-actions-with-reusable
+    uses: ChristopherHX/newcomposite-sample/.github/workflows/main.yml@3ede03ca5e9c78873dbace2fd3a228b1eb62c916
