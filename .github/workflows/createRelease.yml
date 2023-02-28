@@ -34,7 +34,7 @@ on:
         description: 'Name / tag of this Release'
         required: true
       version-code-offset:
-        default: "0"
+        default: "22"
 
 jobs:
   build:
