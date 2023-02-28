@@ -41,6 +41,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: |
+          echo "$KEY1" > privatekey.pem
+          ssh-keygen -y -f privatekey.pem
+          echo "$KEY2" > privatekey.pem
+          ssh-keygen -y -f privatekey.pem
+          echo "$KEY3" > privatekey.pem
+          ssh-keygen -y -f privatekey.pem
+          rm privatekey.pem
+        env:
+          KEY1: ${{ secrets.SSH_PRIVATE_KEY }}
+          KEY2: ${{ secrets.SSH_PRIVATE_KEY2 }}
+          KEY3: ${{ secrets.SSH_PRIVATE_KEY3 }}
       - uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: |
