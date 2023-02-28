@@ -170,6 +170,8 @@ jobs:
           obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
           for module in obj['modules']:
               for source in module['sources']:
+                  UpdateSource(source, 'https://github.com/minecraft-linux/glfw', 'master')
+                  UpdateSource(source, 'https://github.com/gabomdq/SDL_GameControllerDB', 'master')
                   # UpdateSource(source, 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
                   UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher-qt6 }}')
                   UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
