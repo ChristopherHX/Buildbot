@@ -15,6 +15,14 @@ on:
         description: 'Which mcpelauncher-ui to bundle'
         required: true
         default: ng
+      mcpelauncher-qt6:
+        description: 'Which mcpelauncher-qt6 to bundle'
+        required: true
+        default: qt6
+      mcpelauncher-ui-qt6:
+        description: 'Which mcpelauncher-ui-qt6 to bundle'
+        required: true
+        default: qt6
       versiondb:
         description: 'Which versiondb to bundle and check for updates'
         required: true
@@ -25,13 +33,15 @@ on:
       versionname:
         description: 'Name / tag of this Release'
         required: true
+      version-code-offset:
+        default: "0"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: webfactory/ssh-agent@v0.5.1
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: |
             ${{ secrets.SSH_PRIVATE_KEY }}
@@ -151,14 +161,14 @@ jobs:
           obj=json.load(open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json'))
           for module in obj['modules']:
               for source in module['sources']:
-                  UpdateSource(source, 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
-                  UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher }}')
+                  # UpdateSource(source, 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
+                  UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher-qt6 }}')
                   UpdateSource(source, 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
                   mcpeui = 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git'
-                  UpdateSource(source, mcpeui, '${{ github.event.inputs.mcpelauncher-ui }}')
+                  UpdateSource(source, mcpeui, '${{ github.event.inputs.mcpelauncher-ui-qt6 }}')
                   if source['type'] == 'git' and source['url'] == mcpeui:
                       module['build-options']['config-opts'][:] = filterfalse(lambda x: x.startswith('-DLAUNCHER_VERSION_NAME=') or x.startswith('-DLAUNCHER_VERSION_CODE=') or x.startswith('-DLAUNCHER_CHANGE_LOG=') or x.startswith('-DLAUNCHER_VERSIONDB_URL='), module['build-options']['config-opts'])
-                      module['build-options']['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=${{ github.run_number }}', "-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}", '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}']
+                      module['build-options']['config-opts'] += ['-DLAUNCHER_VERSION_NAME=${{ github.event.inputs.versionname }}', '-DLAUNCHER_VERSION_CODE=' + str(${{ github.event.inputs.version-code-offset }} + ${{ github.run_number }}), "-DLAUNCHER_CHANGE_LOG=${{ github.event.inputs.changelog }}", '-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/${{ github.event.inputs.versiondb }}']
 
           json.dump(obj, open('io.mrarm.mcpelauncher/io.mrarm.mcpelauncher.json', 'w'), indent=4)
 
@@ -179,8 +189,3 @@ jobs:
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.2.2
-        with:
-          name: flatpak
-          path: io.mrarm.mcpelauncher
