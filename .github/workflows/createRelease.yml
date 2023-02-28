@@ -42,13 +42,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          echo "$KEY1" > privatekey.pem
-          ssh-keygen -y -f privatekey.pem
-          echo "$KEY2" > privatekey.pem
-          ssh-keygen -y -f privatekey.pem
-          echo "$KEY3" > privatekey.pem
-          ssh-keygen -y -f privatekey.pem
-          rm privatekey.pem
+          echo "$KEY1" | ssh-keygen -y -f /dev/stdin
+          echo "$KEY2" | ssh-keygen -y -f /dev/stdin
+          echo "$KEY3" | ssh-keygen -y -f /dev/stdin
         env:
           KEY1: ${{ secrets.SSH_PRIVATE_KEY }}
           KEY2: ${{ secrets.SSH_PRIVATE_KEY2 }}
