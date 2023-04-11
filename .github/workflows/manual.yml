@@ -26,26 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - OS: ubuntu-latest
-            arch: 'x86_64'
-            opensslflags: linux-x86_64
-          - OS: ubuntu-latest
-            deps: sudo apt install -y gcc-multilib
-            arch: 'i386'
-            opensslflags: linux-x86
           - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'x86_64'
-            opensslflags: darwin64-x86_64-cc
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'i386'
-            opensslflags: darwin-i386-cc
-          - OS: macos-latest
-            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app
-            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
+            deps: ''
+            sdkroot: ''
             version: '11.0'
             arch: 'arm64'
             opensslflags: darwin64-arm64-cc
@@ -55,7 +38,7 @@ jobs:
     steps:
     - name: Cache openssl
       id: cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: output
         key: ${{ env.cache-name }}
@@ -87,64 +70,9 @@ jobs:
         perl ./Configure ${{ matrix.opensslflags }} ('--prefix=' + $INSDIR)
         make install_sw
     - name: Upload Binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-        path: output/
-  libcpp:
-    runs-on: ${{ matrix.OS }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'x86_64'
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'i386'
-            llvmflags: -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      cache-name: cache-libcpp-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-    steps:
-    - name: Cache libc++
-      id: cache
-      uses: actions/cache@v2
-      with:
-        path: output
-        key: ${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
-      with:
-        repository: phracker/MacOSX-SDKs
-        ref: refs/heads/master
-    - name: Install Deps
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
-      run: ${{ matrix.deps }}
-    - name: Build libc++
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: pwsh
-      run: |
-        if ('${{ matrix.sdkroot }}' -ne '') {
-          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
-            $Env:SDKROOT = '${{ matrix.sdkroot }}'
-          } else {
-            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
-          }
-        }
-        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
-        $INSDIR = (Get-Location).ToString() + "/output"
-        mkdir build
-        pushd build
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TOOLS=False -DLLVM_INCLUDE_TOOLS=False -DLLVM_INCLUDE_EXAMPLES=False -DLLVM_INCLUDE_TESTS=False -DLLVM_INCLUDE_DOCS=False -DLLVM_ENABLE_OCAMLDOC=False ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.llvmflags}}
-        make install-cxx install-cxxabi -j4
-    - name: Upload Binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: libcpp-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
   angle:
     runs-on: ${{ matrix.OS }}
@@ -153,15 +81,7 @@ jobs:
       matrix:
         include:
           - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
-            arch: 'x64'
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
-            arch: 'x86'
-          - OS: macos-latest
-            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
+            deps: ''
             version: '11.0'
             arch: 'arm64'
     env:
@@ -170,7 +90,7 @@ jobs:
     steps:
     - name: Cache angle
       id: cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: output
         key: ${{ env.cache-name }}
@@ -211,173 +131,17 @@ jobs:
         gn gen ($INSDIR) ('--args=target_cpu=\"${{ matrix.arch }}\" is_debug=false mac_sdk_path=\"' + $Env:SDKROOT + '\" mac_sdk_min=\"${{ matrix.version }}\" mac_min_system_version=\"${{ matrix.version }}\" mac_deployment_target=\"${{ matrix.version }}\" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false')
         autoninja -C ($INSDIR) libEGL libGLESv2
     - name: Upload Binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
-  freetype2:
-    runs-on: ${{ matrix.OS }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'x86_64'
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.10.sdk
-            arch: 'i386'
-            cmakeflags: -DCMAKE_ASM_FLAGS="--target=i386-apple-darwin" -DCMAKE_C_FLAGS="--target=i386-apple-darwin" -DCMAKE_CXX_FLAGS="--target=i386-apple-darwin"
-          - OS: macos-latest
-            deps: sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
-            sdkroot: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
-            version: '11.0'
-            arch: 'arm64'
-            cmakeflags: -DCMAKE_ASM_FLAGS="--target=arm64-apple-darwin" -DCMAKE_C_FLAGS="--target=arm64-apple-darwin" -DCMAKE_CXX_FLAGS="--target=arm64-apple-darwin"
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      cache-name: cache-freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-v2
-      CC: clang
-      CXX: clang++
-    steps:
-    - name: Cache freetype2
-      id: cache
-      uses: actions/cache@v2
-      with:
-        path: output
-        key: ${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
-      with:
-        repository: phracker/MacOSX-SDKs
-        ref: refs/heads/master
-    - name: Install Deps
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
-      run: ${{ matrix.deps }}
-    - name: Build freetype
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: pwsh
-      run: |
-        if ('${{ matrix.sdkroot }}' -ne '') {
-          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
-            $Env:SDKROOT = '${{ matrix.sdkroot }}'
-          } else {
-            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
-          }
-        }
-        $INSDIR = (Get-Location).ToString() + "/output"
-        git clone git://git.savannah.gnu.org/freetype/freetype2.git freetype2
-        mkdir output
-        mkdir build
-        pushd build
-        cmake ../freetype2 -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) ${{ matrix.cmakeflags }}
-        make install -j4
-    - name: Upload Binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-        path: output/
   build:
     runs-on: ${{ matrix.OS }}
-    needs: [ "freetype2", "libcpp", "openssl" ]
+    needs: [ "openssl" ]
     strategy:
       fail-fast: false
       matrix:
         include:
-          #- AppImage: true
-          #  OS: ubuntu-latest
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: amd64
-            container: '{}'
-            deps: |
-              sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev
-            triple: x86_64-linux-gnu
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: i386
-            container: '{}'
-            deps: |
-              sudo dpkg --add-architecture i386
-              sudo apt-get update
-              sudo apt-get install -y g++-multilib libssl-dev:i386 libpng-dev:i386 libx11-dev:i386 libxi-dev:i386 libcurl4-openssl-dev:i386 libudev-dev:i386 libevdev-dev:i386 libegl1-mesa-dev:i386 libpulse-dev:i386
-            triple: i386-linux-gnu
-            freetype: false
-            openssl: false
-            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: arm64
-            triple: aarch64-linux-gnu
-            deps: |
-              sudo dpkg --add-architecture arm64
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y g++-aarch64-linux-gnu libstdc++-8-dev:arm64 libssl-dev:arm64 libatomic1:arm64 libpng-dev:arm64 libx11-dev:arm64 libxi-dev:arm64 libcurl4-openssl-dev:arm64 libudev-dev:arm64 libevdev-dev:arm64 libegl1-mesa-dev:arm64 libpulse-dev:arm64
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: armhf
-            triple: arm-linux-gnueabihf
-            deps: |
-              sudo dpkg --add-architecture armhf
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libatomic1:armhf libpng-dev:armhf libx11-dev:armhf libxi-dev:armhf libcurl4-openssl-dev:armhf libudev-dev:armhf libevdev-dev:armhf libegl1-mesa-dev:armhf libpulse-dev:armhf
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-            cflags: -march=armv7 -mfpu=neon
-            cxxflags: -march=armv7 -mfpu=neon
-          - AppImage: false
-            OS: macos-latest
-            arch: x86_64
-            version: "10.10"
-            sdkroot: ../MacOSX-SDKs/MacOSX10.14.sdk
-            triple: x86_64-apple-darwin
-            freetype: true
-            openssl: true
-            container: '{}'
-            deps: |
-              brew install autoconf automake
-          - OS: macos-latest
-            version: '10.10'
-            sdkroot: ../MacOSX-SDKs/MacOSX10.12.sdk
-            arch: 'i386'
-            triple: 'i386-apple-darwin'
-            freetype: true
-            openssl: true
-            container: '{}'
-            deps: |
-              brew install autoconf automake
           - AppImage: false
             OS: macos-latest
             arch: arm64
@@ -410,12 +174,12 @@ jobs:
     - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       id: freetype
       if: ${{ matrix.freetype }}
       with:
         name: freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       id: openssl
       if: ${{ matrix.openssl }}
       with:
@@ -450,310 +214,7 @@ jobs:
         popd
         popd
     - name: Upload Binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
-  mcpelauncher-ui:
-    runs-on: ${{ matrix.OS }}
-    # needs: [ "freetype2", "libcpp", "openssl" ]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          #- AppImage: true
-          #  OS: ubuntu-latest
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: amd64
-            container: '{}'
-            deps: |
-              sudo apt-get install -y qttools5-dev libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
-            triple: x86_64-linux-gnu
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: i386
-            container: '{}'
-            deps: |
-              sudo dpkg --add-architecture i386
-              sudo apt-get update
-              sudo apt-get install -y qttools5-dev g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
-            triple: i386-linux-gnu
-            freetype: false
-            openssl: false
-            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: arm64
-            triple: aarch64-linux-gnu
-            deps: |
-              sudo dpkg --add-architecture arm64
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y qttools5-dev g++-aarch64-linux-gnu libstdc++-8-dev:arm64 libssl-dev:arm64 libcurl4-openssl-dev:arm64 libuv1-dev:arm64 libzip-dev:arm64 libprotobuf-dev:arm64 protobuf-compiler qtbase5-dev:arm64 qtwebengine5-dev:arm64 qtdeclarative5-dev:arm64 libqt5svg5-dev:arm64 qml-module-qtquick2:arm64 qml-module-qtquick-layouts:arm64 qml-module-qtquick-controls:arm64 qml-module-qtquick-controls2:arm64 qml-module-qtquick-window2:arm64 qml-module-qtquick-dialogs:arm64 qml-module-qt-labs-settings:arm64 qml-module-qt-labs-folderlistmodel:arm64
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: armhf
-            triple: arm-linux-gnueabihf
-            deps: |
-              sudo dpkg --add-architecture armhf
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y qttools5-dev g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-            cflags: -march=armv7 -mfpu=neon
-            cxxflags: -march=armv7 -mfpu=neon
-          # - AppImage: false
-          #   OS: macos-latest
-          #   arch: x86_64
-          #   version: "10.10"
-          #   sdkroot: ../MacOSX-SDKs/MacOSX10.14.sdk
-          #   triple: x86_64-apple-darwin
-          #   freetype: true
-          #   openssl: true
-          #   container: '{}'
-          #   deps: |
-          #     brew install autoconf automake
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      CC: clang
-      CXX: clang++
-      DEBIAN_FRONTEND: noninteractive
-    # container: ${{ fromJson(matrix.container) }}
-    steps:
-    - uses: actions/checkout@v1
-      if: ${{ startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
-      with:
-        repository: phracker/MacOSX-SDKs
-        ref: refs/heads/master
-    - name: Install Deps
-      shell: pwsh
-      run: ${{ matrix.deps }}
-    - name: Cloning mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
-      shell: pwsh
-      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-ui-manifest-ref }} mcpelauncher-ui
-    - name: Building mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
-      shell: pwsh
-      env:
-        CC: clang
-        CXX: clang++
-      run: |
-        if ('${{ matrix.sdkroot }}' -ne '') {
-          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
-            $Env:SDKROOT = '${{ matrix.sdkroot }}'
-          } else {
-            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
-          }
-        }
-        mkdir output
-        mkdir build
-        $INSDIR = (Get-Location).ToString() + "/output"
-        ${{ matrix.envflags }}
-        pushd build
-        $EXTRA_FLAGS = ''
-        if ('${{steps.openssl.outputs.download-path}}' -ne '') {
-          if ($EXTRA_FLAGS -ne '') {
-            $EXTRA_FLAGS += ' '
-          }
-          $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
-        }
-        cmake ../mcpelauncher-ui -DCMAKE_BUILD_TYPE=Release ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
-        make install -j4
-        popd
-        popd
-    - name: Upload Binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: mcpelauncher-ui-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-        path: output/
-  mcpelauncher-appimage:
-    runs-on: ${{ matrix.OS }}
-#     "build", 
-    needs: [ "mcpelauncher-ui" ]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          #- AppImage: true
-          #  OS: ubuntu-latest
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: amd64
-            linuxdeployarch: x86_64
-            linuxdeploytoolarch: x86_64
-            appimagetoolruntimearch: x86_64
-            container: '{}'
-            deps: |
-              sudo apt-get install -y libpng-dev libx11-dev libxi-dev libcurl4-openssl-dev libudev-dev libevdev-dev libegl1-mesa-dev libpulse-dev libssl-dev libcurl4-openssl-dev libuv1-dev libzip-dev libprotobuf-dev protobuf-compiler qtbase5-dev qtwebengine5-dev qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick2 qml-module-qtquick-layouts qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel
-            triple: x86_64-linux-gnu
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: i386
-            linuxdeployarch: i386
-            linuxdeploytoolarch: i386
-            appimagetoolruntimearch: i686
-            container: '{}'
-            deps: |
-              sudo dpkg --add-architecture i386
-              sudo apt-get update
-              sudo apt-get install -y libfuse2:i386 g++-multilib libssl-dev:i386 libcurl4-openssl-dev:i386 libuv1-dev:i386 libzip-dev:i386 libprotobuf-dev:i386 protobuf-compiler qtbase5-dev:i386 qtwebengine5-dev:i386 qtdeclarative5-dev:i386 libqt5svg5-dev:i386 qml-module-qtquick2:i386 qml-module-qtquick-layouts:i386 qml-module-qtquick-controls:i386 qml-module-qtquick-controls2:i386 qml-module-qtquick-window2:i386 qml-module-qtquick-dialogs:i386 qml-module-qt-labs-settings:i386 qml-module-qt-labs-folderlistmodel:i386
-            triple: i386-linux-gnu
-            freetype: false
-            openssl: false
-            cmakeextraflags: -DOPENSSL_ROOT_DIR=/usr/lib/i386-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: arm64
-            triple: aarch64-linux-gnu
-            linuxdeployarch: arm_aarch64
-            linuxdeploytoolarch: x86_64
-            appimagetoolruntimearch: aarch64
-            deps: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-              sudo cp ldd /usr/bin/ldd
-              sudo chmod +x /usr/bin/ldd
-              sudo dpkg --add-architecture arm64
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y qtdeclarative5-dev-tools:arm64 qtchooser:arm64 qt5-default:arm64 libstdc++-8-dev:arm64 libssl-dev:arm64 libcurl4-openssl-dev:arm64 libuv1-dev:arm64 libzip-dev:arm64 libprotobuf-dev:arm64 protobuf-compiler qtbase5-dev:arm64 qtwebengine5-dev:arm64 qtdeclarative5-dev:arm64 libqt5svg5-dev:arm64 qml-module-qtquick2:arm64 qml-module-qtquick-layouts:arm64 qml-module-qtquick-controls:arm64 qml-module-qtquick-controls2:arm64 qml-module-qtquick-window2:arm64 qml-module-qtquick-dialogs:arm64 qml-module-qt-labs-settings:arm64 qml-module-qt-labs-folderlistmodel:arm64
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-          - AppImage: false
-            OS: ubuntu-latest
-            arch: armhf
-            triple: arm-linux-gnueabihf
-            linuxdeployarch: arm
-            linuxdeploytoolarch: i386
-            appimagetoolruntimearch: armhf
-            deps: |
-              docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-              sudo cp ldd /usr/bin/ldd
-              sudo chmod +x /usr/bin/ldd
-              sudo dpkg --add-architecture armhf
-              sudo dpkg --add-architecture i386
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)' main universe multiverse restricted' > /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-updates' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-backports' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo bash -c "echo 'deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ '$(lsb_release -c -s)-security' main universe multiverse restricted' >> /etc/apt/sources.list"
-              sudo apt-get update -y
-              # sudo apt remove '*-dev'
-              sudo apt-get install -y libfuse2:i386 qtdeclarative5-dev-tools:armhf qtchooser:armhf qt5-default:armhf g++-arm-linux-gnueabihf libstdc++-8-dev:armhf libssl-dev:armhf libcurl4-openssl-dev:armhf libuv1-dev:armhf libzip-dev:armhf libprotobuf-dev:armhf protobuf-compiler qtbase5-dev:armhf qtwebengine5-dev:armhf qtdeclarative5-dev:armhf libqt5svg5-dev:armhf qml-module-qtquick2:armhf qml-module-qtquick-layouts:armhf qml-module-qtquick-controls:armhf qml-module-qtquick-controls2:armhf qml-module-qtquick-window2:armhf qml-module-qtquick-dialogs:armhf qml-module-qt-labs-settings:armhf qml-module-qt-labs-folderlistmodel:armhf
-              echo 'set(CMAKE_SYSTEM_NAME Linux)' > toolchain.txt
-              echo 'set(CMAKE_SYSTEM_PROCESSOR arm)' >> toolchain.txt
-            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt') -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu/ -DQt5LinguistTools_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5LinguistTools
-            envflags: $Env:LDFLAGS = '-latomic'
-            freetype: false
-            openssl: false
-            cflags: -march=armv7 -mfpu=neon
-            cxxflags: -march=armv7 -mfpu=neon
-          # - AppImage: false
-          #   OS: macos-latest
-          #   arch: x86_64
-          #   version: "10.10"
-          #   sdkroot: ../MacOSX-SDKs/MacOSX10.14.sdk
-          #   triple: x86_64-apple-darwin
-          #   freetype: true
-          #   openssl: true
-          #   container: '{}'
-          #   deps: |
-          #     brew install autoconf automake
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
-      CC: clang
-      CXX: clang++
-      DEBIAN_FRONTEND: noninteractive
-    # container: ${{ fromJson(matrix.container) }}
-    steps:
-    # needed for ldd hack
-    - uses: actions/checkout@v2
-    - name: Install Deps
-      shell: pwsh
-      run: ${{ matrix.deps }}
-#     - uses: actions/download-artifact@v2
-#       id: mcpelauncher
-#       with:
-#         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-#         path: appdir/usr/
-    - uses: actions/download-artifact@v2
-      id: mcpelauncher-ui
-      with:
-        name: mcpelauncher-ui-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-        path: appdir/usr/
-    - name: Cloning mcpelauncher-ui ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }}/${{ github.event.inputs.mcpelauncher-ui-manifest-ref }}
-      shell: pwsh
-      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-ui-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-ui-manifest-ref }} mcpelauncher-ui
-    - name: Building AppImage Binary
-      shell: pwsh
-      env:
-        ARCH: ${{ matrix.linuxdeployarch }}
-        BUILD_NUM: ${GITHUB_RUN_NUMBER}
-        OUTPUT: Minecraft_Bedrock_Launcher-${{ matrix.arch }}-build-0.AppImage
-        QMAKE: /usr/bin/${{ matrix.triple }}-qmake
-      run: |
-        curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy.AppImage
-        chmod +x linuxdeploy.AppImage
-        curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${{ matrix.linuxdeploytoolarch }}.AppImage --output linuxdeploy-plugin-qt.AppImage
-        chmod +x linuxdeploy-plugin-qt.AppImage
-        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage --output appimagetool.AppImage
-        chmod +x appimagetool.AppImage
-        curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${{ matrix.appimagetoolruntimearch }} --output runtime
-        $Env:PATH='/usr/lib/${{ matrix.triple }}/qt5/bin/:' + $Env:PATH
-        # $INSDIR = (Get-Location).ToString() + "/output"
-        ./linuxdeploy.AppImage --appdir $PWD/appdir -i $PWD/appdir/usr/share/pixmaps/mcpelauncher-ui-qt.png -d $PWD/appdir/usr/share/applications/mcpelauncher-ui-qt.desktop
-        $Env:QML_SOURCES_PATHS='mcpelauncher-ui/mcpelauncher-ui-qt/qml/'
-        ./linuxdeploy-plugin-qt.AppImage --appdir $PWD/appdir
-        mkdir -p $PWD/appdir/usr/lib/
-        cp -r /usr/lib/${{ matrix.triple }}/nss $PWD/appdir/usr/lib/
-        ./appimagetool.AppImage --comp xz --runtime-file runtime $PWD/appdir $OUTPUT
-    - name: Upload AppImage Binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: AppImage-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-        path: Minecraft_Bedrock_Launcher-*.AppImage
