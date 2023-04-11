@@ -142,7 +142,6 @@ jobs:
             container: '{}'
             deps: |
               brew install autoconf automake
-              sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
               echo 'set(CMAKE_SYSTEM_NAME Darwin)' > toolchain.txt
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             triple: arm64-apple-darwin
