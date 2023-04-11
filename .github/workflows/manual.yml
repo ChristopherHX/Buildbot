@@ -146,7 +146,6 @@ jobs:
               echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
             triple: arm64-apple-darwin
             cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt')
-            freetype: true
             openssl: true
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
@@ -166,11 +165,6 @@ jobs:
     - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
-    - uses: actions/download-artifact@v3
-      id: freetype
-      if: ${{ matrix.freetype }}
-      with:
-        name: freetype2-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
     - uses: actions/download-artifact@v3
       id: openssl
       if: ${{ matrix.openssl }}
@@ -201,7 +195,7 @@ jobs:
           }
           $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
         }
-        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_WEBVIEW=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} -DJNI_USE_JNIVM=ON $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_UI=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
         make install -j4
         popd
         popd
@@ -210,3 +204,21 @@ jobs:
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
+  upload-all:
+    needs:
+    - build
+    - angle
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: "artifacts"
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "artifacts/**"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v0.0.${{ github.run_id }}
+          commit: ${{ github.sha }}
+          body: |
+            # TBD
