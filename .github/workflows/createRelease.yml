@@ -24,14 +24,15 @@ on:
         required: true
         default: qt6
       versiondb:
-        description: 'Which versiondb to bundle and check for updates'
+        description: 'Which versiondb to bundle and check for updates e.g. v0.12.x'
         required: true
         default: master
       changelog:
-        description: 'Changelog of this Release'
+        description: 'Changelog of this Release list of html p tags'
         required: true
+        default: "<p>No changelog provided</p>"
       versionname:
-        description: 'Name / tag of this Release'
+        description: 'Name / tag of this Release e.g. v0.11.4'
         required: true
       version-code-offset:
         default: "22"
@@ -129,7 +130,9 @@ jobs:
          
           writeCommit('linux-packaging-scripts/msa.commit', 'https://github.com/minecraft-linux/msa-manifest.git', '${{ github.event.inputs.msa }}')
           writeCommit('linux-packaging-scripts/mcpelauncher.commit', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher }}')
+          writeCommit('linux-packaging-scripts/mcpelauncher-qt6.commit', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', '${{ github.event.inputs.mcpelauncher-qt6 }}')
           writeCommit('linux-packaging-scripts/mcpelauncher-ui.commit', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', '${{ github.event.inputs.mcpelauncher-ui }}')
+          writeCommit('linux-packaging-scripts/mcpelauncher-ui-qt6.commit', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', '${{ github.event.inputs.mcpelauncher-ui-qt6 }}')
           writeCommit('linux-packaging-scripts/versionsdb.txt', 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
       - name: linux-AppImage 3/3
         run: |
