@@ -204,3 +204,28 @@ jobs:
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push origin HEAD:release/${{ github.event.inputs.versionname }}
           popd
+      - name: Create Tags
+        shell: python
+        run: |
+          from subprocess import check_output, check_call, DEVNULL
+          import tempfile
+
+          def GetCommitSha(url, ref):
+              with tempfile.TemporaryDirectory() as directory:
+                  check_call(['git', 'init'], cwd=directory, stdout=DEVNULL, stderr=DEVNULL)
+                  check_call(['git', 'remote', 'add', 'origin', url], cwd=directory)
+                  res = check_output(["git", "ls-remote", "origin", ref], cwd=directory).split(b'\t')[0].decode("utf-8")
+                  if len(res) == 0:
+                      return ref
+                  return res
+
+          def createRelease(name, ref, tag):
+              check_call(['gh', 'release', 'create', tag, '--repo', name, '--target', GetCommitSha('https://github.com/' + name, ref), '--notes', "${{ github.event.inputs.changelog }}"], cwd=directory)
+
+          createRelease('minecraft-linux/mcpelauncher-manifest', '${{ github.event.inputs.mcpelauncher }}', '${{ github.event.inputs.versionname }}')
+          createRelease('minecraft-linux/mcpelauncher-manifest', '${{ github.event.inputs.mcpelauncher-qt6 }}', '${{ github.event.inputs.versionname }}-qt6')
+          createRelease('minecraft-linux/mcpelauncher-ui-manifest', '${{ github.event.inputs.mcpelauncher-ui }}', '${{ github.event.inputs.versionname }}')
+          createRelease('minecraft-linux/mcpelauncher-ui-manifest', '${{ github.event.inputs.mcpelauncher-ui-qt6 }}', '${{ github.event.inputs.versionname }}-qt6')
+
+        env:
+          GH_TOKEN: ${{ secrets.UPDATE_TAGS_TOKEN }}
