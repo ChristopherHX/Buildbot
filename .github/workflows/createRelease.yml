@@ -220,7 +220,7 @@ jobs:
                   return res
 
           def createRelease(name, ref, tag):
-              check_call(['gh', 'release', 'create', tag, '--repo', name, '--target', GetCommitSha('https://github.com/' + name, ref), '--notes', "${{ github.event.inputs.changelog }}"], cwd=directory)
+              check_call(['gh', 'release', 'create', tag, '--repo', name, '--target', GetCommitSha('https://github.com/' + name, ref), '--notes', "${{ github.event.inputs.changelog }}"])
 
           createRelease('minecraft-linux/mcpelauncher-manifest', '${{ github.event.inputs.mcpelauncher }}', '${{ github.event.inputs.versionname }}')
           createRelease('minecraft-linux/mcpelauncher-manifest', '${{ github.event.inputs.mcpelauncher-qt6 }}', '${{ github.event.inputs.versionname }}-qt6')
