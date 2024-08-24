@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       msa:
-        description: 'Which msa to bundle and check for updates'
+        description: 'Which msa to bundle'
         required: true
         default: master
       mcpelauncher:
@@ -32,7 +32,7 @@ on:
         required: true
         default: "<p>No changelog provided</p>"
       versionname:
-        description: 'Name / tag of this Release e.g. v0.11.4'
+        description: 'Name / tag of this Release e.g. v1.0.0'
         required: true
       version-code-offset:
         default: "22"
