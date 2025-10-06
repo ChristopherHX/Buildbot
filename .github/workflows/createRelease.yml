@@ -67,16 +67,14 @@ jobs:
         with:
           python-version: 3.9
       - name: osx 1/3
-        if: "false" # Deprecated
         run: |
-          git clone git@github.com:christopherhx/osx-packaging-scripts.git
+          git clone https://${{ github.actor }}:${{ secrets.BUILDBOT_TOKEN }}github.com:minecraft-linux/macos-builder-meta.git
           pushd osx-packaging-scripts
           echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo "${{ github.event.inputs.changelog }}" > changelog.txt
           echo '${{ github.event.inputs.versionname }}' > version.txt
           popd
       - name: osx 2/3
-        if: "false" # Deprecated
         shell: python
         run: |
           from subprocess import check_output, check_call, DEVNULL
@@ -99,12 +97,29 @@ jobs:
           writeCommit('osx-packaging-scripts/mcpelauncher-ui.commit', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', '${{ github.event.inputs.mcpelauncher-ui }}')
           writeCommit('osx-packaging-scripts/versionsdb.txt', 'https://github.com/minecraft-linux/mcpelauncher-versiondb.git', '${{ github.event.inputs.versiondb }}')
       - name: osx 3/3
-        if: "false" # Deprecated
+        env:
+          GH_TOKEN: ${{ secrets.BUILDBOT_TOKEN }}
         run: |
           pushd osx-packaging-scripts
           git add .
           git commit -m "Release ${{ github.event.inputs.versionname }} via Buildbot"
           git push origin HEAD:release/${{ github.event.inputs.versionname }}
+          gh variable set "META_COMMIT" --body "$(git rev-parse HEAD)" --repo minecraft-linux/macos-builder
+          gh workflow run ci.yml \
+          --field type=release \
+          --repo minecraft-linux/macos-builder \
+          --ref createRelease
+          gh workflow run main.yml \
+          --repo minecraft-linux/pkg \
+          --field redeploy=false \
+          --field channel="release" \
+          --field version="${{ github.event.inputs.versionname }}" \
+          --field changelog="${{ github.event.inputs.changelog }}" \
+          --field versionsdbremote="${{ github.event.inputs.versiondb }}" \
+          --field mcpelauncher-manifest="${{ github.event.inputs.mcpelauncher }}" \
+          --field mcpelauncher-manifest-qt6="${{ github.event.inputs.mcpelauncher-qt6 }}" \
+          --field mcpelauncher-ui-manifest="${{ github.event.inputs.mcpelauncher-ui }}" \
+          --field mcpelauncher-ui-manifest-qt6="${{ github.event.inputs.mcpelauncher-ui-qt6 }}"
           popd
       - name: linux-AppImage 1/3
         if: "false" # Deprecated
