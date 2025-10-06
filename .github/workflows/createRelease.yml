@@ -68,7 +68,7 @@ jobs:
           python-version: 3.9
       - name: osx 1/3
         run: |
-          git clone https://${{ github.actor }}:${{ secrets.BUILDBOT_TOKEN }}@github.com:minecraft-linux/macos-builder-meta.git
+          git clone https://${{ github.actor }}:${{ secrets.BUILDBOT_TOKEN }}@github.com/minecraft-linux/macos-builder-meta.git
           pushd osx-packaging-scripts
           echo ${{ github.event.inputs.versiondb }} > versionsdbremote.txt
           echo "${{ github.event.inputs.changelog }}" > changelog.txt
