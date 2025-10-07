@@ -109,11 +109,12 @@ jobs:
           --field type=release \
           --repo minecraft-linux/macos-builder \
           --ref createRelease
+          version="${{ github.event.inputs.versionname }}"
           gh workflow run main.yml \
           --repo minecraft-linux/pkg \
           --field redeploy=false \
           --field channel="release" \
-          --field version="${{ github.event.inputs.versionname }}" \
+          --field version="${version#v}" \
           --field changelog="${{ github.event.inputs.changelog }}" \
           --field versionsdbremote="${{ github.event.inputs.versiondb }}" \
           --field mcpelauncher-manifest="${{ github.event.inputs.mcpelauncher }}" \
