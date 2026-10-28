@@ -62,10 +62,10 @@ jobs:
           # from https://github.com/orgs/community/discussions/26560
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
         with:
-          python-version: 3.9
+          python-version: '3.13' 
       - name: osx 1/3
         run: |
           git clone https://${{ github.actor }}:${{ secrets.BUILDBOT_TOKEN }}@github.com/minecraft-linux/macos-builder-meta.git osx-packaging-scripts
